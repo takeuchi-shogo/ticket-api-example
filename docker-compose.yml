@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  server:
+    container_name: tacketmaster_api
+    build:
+      args:
+        - target=dev
+      context: .
+      dockerfile: ./.docker/server/Dockerfile
+    depends_on:
+      - database
+      - redis
+    ports:
+      - 8000:${SERVER_PORT}
+    volumes:
+      - ./server:/var/www/html
+    working_dir: /var/www/html
+
+  database:
+    container_name: tacketmaster_db
+    image: mysql:8.0.28
+    platform: linux/amd64
+    restart: always
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/sql:/sql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    # env_file:
+    #   - .env
+    #container_name: sns_mysql
+    # ports:
+    #    - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASS}'
+      MYSQL_ROOT_HOST: "%"
+      # MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+      # MYSQL_USER: ${DB_USER}
+      # MYSQL_PASSWORD: ${DB_PASS}
+      TZ: 'Asia/Tokyo'
+    cap_add:
+      - SYS_NICE #追加
+
+  redis:
+    image: redis:latest
+    container_name: tacketmaster_redis
+    ports:
+      - 6379:6379
+    restart: always

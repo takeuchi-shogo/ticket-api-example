@@ -1,2 +1,8 @@
+.env
 
-/server/config/config.go
+/api/config/config.go
+
+mysql/sql
+mysql/data
+
+!.gitkeep
