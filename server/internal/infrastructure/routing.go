@@ -23,30 +23,39 @@ const (
 )
 
 type Routing struct {
-	db   *DB
+	// db   *DB
 	Gin  *gin.Engine
 	Port string
 }
 
 type Controllers struct {
-	auth  controllers.AuthController
-	event controllers.EventController
-	user  controllers.UserController
+	admin     controllers.AdministratorsController
+	auth      controllers.AuthController
+	event     controllers.EventController
+	organizer controllers.OrganizersController
+	ticket    controllers.TicketsController
+	user      controllers.UserController
 }
 
 func NewControllers(
+	ad controllers.AdministratorsController,
 	a controllers.AuthController,
 	e controllers.EventController,
+	o controllers.OrganizersController,
+	t controllers.TicketsController,
 	u controllers.UserController,
 ) Controllers {
 	return Controllers{
-		auth:  a,
-		event: e,
-		user:  u,
+		admin:     ad,
+		auth:      a,
+		event:     e,
+		organizer: o,
+		ticket:    t,
+		user:      u,
 	}
 }
 
-func NewRouting(config config.ServerConfig, db *DB, c Controllers) *Routing {
+func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 
 	if config.AppEnvironment == "development" {
 		gin.SetMode(gin.DebugMode)
@@ -54,7 +63,6 @@ func NewRouting(config config.ServerConfig, db *DB, c Controllers) *Routing {
 	}
 
 	r := &Routing{
-		db:   db,
 		Gin:  gin.Default(),
 		Port: fmt.Sprintf(":%d", config.Port),
 	}
@@ -64,13 +72,21 @@ func NewRouting(config config.ServerConfig, db *DB, c Controllers) *Routing {
 
 	r.Gin.GET("/events/:id", func(ctx *gin.Context) { c.event.Get(ctx) })
 
+	r.Gin.GET("/organizers/:id", func(ctx *gin.Context) { c.organizer.Get(ctx) })
+
+	r.Gin.GET("/tickets/:id", func(ctx *gin.Context) { c.ticket.Get(ctx) })
+
 	r.Gin.GET("/users/:id", func(ctx *gin.Context) { c.user.Get(ctx) })
+
+	v1Admin := r.Gin.Group("/admin")
+	{
+		v1Admin.GET("/administrators/:id", func(ctx *gin.Context) { c.admin.Get(ctx) })
+	}
 
 	return r
 }
 
 func (r *Routing) Run() {
-	// fmt.Printf("finasldn: %+v", r)
 	s := &http.Server{
 		Addr:           r.Port,
 		Handler:        r.Gin,
@@ -79,4 +95,6 @@ func (r *Routing) Run() {
 		MaxHeaderBytes: 1 << 20,
 	}
 	s.ListenAndServe()
+
+	fmt.Printf("Running server: %s\n", r.Port)
 }

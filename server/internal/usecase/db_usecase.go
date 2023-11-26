@@ -1,8 +1,8 @@
 package usecase
 
-import "gorm.io/gorm"
+import "github.com/uptrace/bun"
 
 type DBUsecase interface {
-	Connect() *gorm.DB
-	Begin() *gorm.DB
+	Connect() *bun.DB
+	Transaction() (bun.Tx, error)
 }

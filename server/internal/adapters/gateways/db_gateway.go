@@ -1,24 +1,27 @@
 package gateways
 
-import "gorm.io/gorm"
+import (
+	"github.com/takeuchi-shogo/ticket-api/internal/usecase"
+	"github.com/uptrace/bun"
+)
 
 type DB interface {
-	Connect() *gorm.DB
-	Begin() *gorm.DB
+	Connect() *bun.DB
+	Transaction() (bun.Tx, error)
 }
 
 type DBGateway struct {
 	DB DB
 }
 
-func NewDBGateway() DB {
-	return &DBGateway{}
+func NewDBGateway(db DB) usecase.DBUsecase {
+	return &DBGateway{DB: db}
 }
 
-func (g *DBGateway) Connect() *gorm.DB {
+func (g *DBGateway) Connect() *bun.DB {
 	return g.DB.Connect()
 }
 
-func (g *DBGateway) Begin() *gorm.DB {
-	return g.DB.Begin()
+func (g *DBGateway) Transaction() (bun.Tx, error) {
+	return g.DB.Transaction()
 }

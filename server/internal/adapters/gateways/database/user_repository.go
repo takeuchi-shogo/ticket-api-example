@@ -10,6 +10,6 @@ func NewUserRepository() *UserRepository {
 
 func (u *UserRepository) FindByID(id int) (*models.Users, error) {
 	return &models.Users{
-		ID: id,
+		ID: uint64(id),
 	}, nil
 }

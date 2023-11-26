@@ -2,7 +2,6 @@
 
 /api/config/config.go
 
-mysql/sql
 mysql/data
 
 !.gitkeep

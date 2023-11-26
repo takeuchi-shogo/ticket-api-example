@@ -12,16 +12,22 @@ type ServerConfig struct {
 	AppName        string `mapstructure:"APP_NAME"`
 	TokenTTL       int    `mapstructure:"TOKEN_TTL"`
 	JwtAuthKey     string `mapstructure:"JWT_PRIVATE_KEY"`
-	DB             struct {
-		Host     string `mapstructure:"DB_HOST"`
-		UserName string `mapstructure:"DB_USER"`
-		Password string `mapstructure:"DB_PASS"`
-		DBName   string `mapstructure:"DB_NAME"`
-	}
-	Port int `mapstructure:"SERVER_PORT"`
+	// DB             struct {
+	// 	Host     string `mapstructure:"DB_HOST"`
+	// 	UserName string `mapstructure:"DB_USER"`
+	// 	Password string `mapstructure:"DB_PASS"`
+	// 	DBName   string `mapstructure:"DB_NAME"`
+	// }
+	DBHost     string `mapstructure:"DB_HOST"`
+	DBUserName string `mapstructure:"DB_USER"`
+	DBPassword string `mapstructure:"DB_PASS"`
+	DBName     string `mapstructure:"DB_NAME"`
+	Port       int    `mapstructure:"SERVER_PORT"`
 }
 
-var Module = fx.Provide(NewConfig)
+var Module = fx.Options(
+	fx.Provide(NewConfig),
+)
 
 func NewConfig() ServerConfig {
 	config := ServerConfig{}

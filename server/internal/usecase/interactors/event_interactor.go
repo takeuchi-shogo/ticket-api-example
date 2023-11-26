@@ -7,19 +7,24 @@ import (
 )
 
 type EventInteractor struct {
+	db           usecase.DBUsecase
 	eventUsecase usecase.EventUsecase
 }
 
 func NewEventInteractor(
+	db usecase.DBUsecase,
 	event usecase.EventUsecase,
 ) services.EventService {
 	return &EventInteractor{
+		db:           db,
 		eventUsecase: event,
 	}
 }
 
 func (e *EventInteractor) Get(id int) (*models.Events, *usecase.ResultStatus) {
-	event, err := e.eventUsecase.FindByID(id)
+	db := e.db.Connect()
+
+	event, err := e.eventUsecase.FindByID(db, id)
 	if err != nil {
 		return &models.Events{}, usecase.NewResultStatus(400, err)
 	}

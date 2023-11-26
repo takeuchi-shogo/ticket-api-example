@@ -16,6 +16,8 @@ services:
     volumes:
       - ./server:/var/www/html
     working_dir: /var/www/html
+    networks:
+      - tacketmaster-api-network
 
   database:
     container_name: tacketmaster_db
@@ -23,24 +25,41 @@ services:
     platform: linux/amd64
     restart: always
     volumes:
+      - ./mysql/migrations:/docker-entrypoint-initdb.d
       - ./mysql/data:/var/lib/mysql
       - ./mysql/sql:/sql
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
     # env_file:
     #   - .env
     #container_name: sns_mysql
-    # ports:
-    #    - 3306:3306
+    ports:
+       - 3306:3306
     environment:
-      MYSQL_ROOT_PASSWORD: '${DB_PASS}'
-      MYSQL_ROOT_HOST: "%"
+      # MYSQL_ROOT_PASSWORD: '${DB_PASS}'
+      # MYSQL_ROOT_HOST: "%"
       # MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
       MYSQL_DATABASE: ${DB_NAME}
-      # MYSQL_USER: ${DB_USER}
-      # MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
       TZ: 'Asia/Tokyo'
     cap_add:
       - SYS_NICE #追加
+    networks:
+      - tacketmaster-api-network
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    restart: always
+    ports:
+      - 9000:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=database
+      - PMA_USER=${DB_USER}
+      - PMA_PASSWORD=${DB_PASS}
+    networks:
+      - tacketmaster-api-network
 
   redis:
     image: redis:latest
@@ -48,3 +67,9 @@ services:
     ports:
       - 6379:6379
     restart: always
+    networks:
+      - tacketmaster-api-network
+
+networks:
+  tacketmaster-api-network:
+    name: tacketmaster_api_network
