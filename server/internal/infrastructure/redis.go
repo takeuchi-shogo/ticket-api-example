@@ -2,15 +2,17 @@ package infrastructure
 
 import (
 	"fmt"
+	"time"
 
 	redis "github.com/redis/go-redis/v9"
+	"github.com/takeuchi-shogo/ticket-api/internal/adapters/gateways"
 )
 
 type Redis struct {
 	RDB *redis.Client
 }
 
-func NewRedis() *Redis {
+func NewRedis() gateways.Redis {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "redis:6379",
 		Password: "",
@@ -24,6 +26,14 @@ func NewRedis() *Redis {
 
 func (r *Redis) Set(key string, value interface{}) error {
 	err := r.Set(key, value)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *Redis) SetNx(key string, value interface{}, expireAt time.Duration) error {
+	err := r.SetNx(key, value, expireAt)
 	if err != nil {
 		return err
 	}

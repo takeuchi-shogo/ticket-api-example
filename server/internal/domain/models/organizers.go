@@ -23,3 +23,14 @@ type OrganizersResponse struct {
 	ContactTel   string `json:"contact_tel"`
 	ContactEmail string `json:"contact_email"`
 }
+
+func (o *Organizers) BuildFor() *OrganizersResponse {
+	return &OrganizersResponse{
+		ID:           o.ID,
+		DisplayName:  o.DisplayName,
+		ScreenName:   o.ScreenName,
+		CompanyUrl:   *o.CompanyUrl,
+		ContactTel:   o.ContactTel,
+		ContactEmail: o.ContactEmail,
+	}
+}

@@ -18,3 +18,17 @@ type UsersResponse struct {
 	ScreenName  string `json:"screen_name"`
 	Email       string `json:"email"`
 }
+
+type MeInteractorResponse struct {
+	User  *UsersResponse `json:"user"`
+	Token string         `json:"token"`
+}
+
+func (u *Users) BuildForGet() *UsersResponse {
+	return &UsersResponse{
+		ID:          u.ID,
+		DisplayName: u.DisplayName,
+		ScreenName:  u.ScreenName,
+		Email:       u.Email,
+	}
+}

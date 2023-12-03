@@ -31,3 +31,19 @@ type EventsReponse struct {
 	Note              *string `json:"note"`
 	IsPrivate         bool    `json:"is_private"`
 }
+
+func (e *Events) BuildFor() *EventsReponse {
+	return &EventsReponse{
+		ID:                e.ID,
+		OrganizerID:       e.OrganizerID,
+		VenueID:           e.VenueID,
+		Title:             e.Title,
+		PerformancePeriod: e.PerformancePeriod,
+		EventType:         e.EventType,
+		ShowTime:          e.ShowTime,
+		OpeningTime:       e.OpeningTime,
+		Description:       e.Description,
+		Note:              e.Note,
+		IsPrivate:         e.IsPrivate,
+	}
+}

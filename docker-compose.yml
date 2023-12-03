@@ -29,6 +29,7 @@ services:
       - ./mysql/data:/var/lib/mysql
       - ./mysql/sql:/sql
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mysql/log:/var/log
     # env_file:
     #   - .env
     #container_name: sns_mysql
@@ -69,6 +70,20 @@ services:
     restart: always
     networks:
       - tacketmaster-api-network
+
+  redisCommander:
+    container_name: tacketmaster_redis-commander
+    image: rediscommander/redis-commander:latest
+    environment:
+      REDIS_HOSTS: redis
+      TZ: JST-9
+    ports:
+      - "9001:8081"
+    depends_on:
+      - redis
+    networks:
+      - tacketmaster-api-network
+
 
 networks:
   tacketmaster-api-network:

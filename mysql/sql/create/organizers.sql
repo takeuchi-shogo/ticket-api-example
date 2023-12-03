@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `organiers` (
+CREATE TABLE IF NOT EXISTS `organizers` (
 	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`display_name` varchar(255) NOT NULL,
 	`screen_name` varchar(50) NOT NULL,

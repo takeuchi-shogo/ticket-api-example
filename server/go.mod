@@ -3,6 +3,7 @@ module github.com/takeuchi-shogo/ticket-api
 go 1.15
 
 require (
+	github.com/gin-contrib/cors v1.5.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/golang-jwt/jwt/v5 v5.1.0
@@ -13,6 +14,7 @@ require (
 	github.com/spf13/viper v1.17.0
 	github.com/uptrace/bun v1.1.16
 	github.com/uptrace/bun/dialect/mysqldialect v1.1.16
+	github.com/uptrace/bun/extra/bundebug v1.1.16
 	go.uber.org/fx v1.20.1
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/crypto v0.14.0

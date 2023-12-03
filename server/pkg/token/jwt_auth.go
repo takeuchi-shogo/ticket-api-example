@@ -2,7 +2,6 @@ package token
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -58,7 +57,6 @@ func (jm *JwtMaker) GenerateJWT(userID string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(jm.PrivateKey))
-	fmt.Println(err)
 	if err != nil {
 		return "", err
 	}

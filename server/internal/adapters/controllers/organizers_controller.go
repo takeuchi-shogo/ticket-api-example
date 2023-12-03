@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/presenters"
+	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase/services"
 )
 
@@ -30,4 +33,17 @@ func (o *organizersController) Get(ctx Context) {
 
 func (o *organizersController) Post(ctx Context) {
 
+	organizer := &models.Organizers{}
+	if err := ctx.ShouldBind(organizer); err != nil {
+		ctx.JSON(http.StatusBadRequest, presenters.NewErrResponse(err.Error()))
+		return
+	}
+
+	newOrganizer, res := o.organizer.Create(organizer)
+	if res.Err != nil {
+		ctx.JSON(res.StatusCode, presenters.NewErrResponse(res.Err.Error()))
+		return
+	}
+
+	ctx.JSON(res.StatusCode, presenters.NewResponse(newOrganizer))
 }

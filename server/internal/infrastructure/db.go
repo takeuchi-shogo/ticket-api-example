@@ -12,6 +12,7 @@ import (
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/gateways"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/mysqldialect"
+	"github.com/uptrace/bun/extra/bundebug"
 )
 
 type DB struct {
@@ -70,6 +71,8 @@ func connection(host, username, password, dbName string) *bun.DB {
 	// sqldb.SetMaxOpenConns(config.MaxOpenConns)
 
 	db := bun.NewDB(sqldb, mysqldialect.New())
+
+	db.AddQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(true)))
 
 	log.Print("database connection success\n")
 

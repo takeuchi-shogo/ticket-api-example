@@ -8,6 +8,7 @@ var Module = fx.Options(
 		NewAuthInteractor,
 		NewOrganizerInteractor,
 		NewEventInteractor,
+		NewMeInteractor,
 		NewTicketInteractor,
 		NewUserInteractor,
 	),

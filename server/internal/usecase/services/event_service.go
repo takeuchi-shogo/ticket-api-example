@@ -7,4 +7,6 @@ import (
 
 type EventService interface {
 	Get(id int) (*models.Events, *usecase.ResultStatus)
+	GetList() ([]*models.EventsReponse, *usecase.ResultStatus)
+	Create(event *models.Events) (*models.EventsReponse, *usecase.ResultStatus)
 }
