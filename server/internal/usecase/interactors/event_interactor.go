@@ -23,7 +23,7 @@ func NewEventInteractor(
 
 func (e *eventInteractor) Get(id int) (*models.Events, *usecase.ResultStatus) {
 
-	db := e.db.Connect()
+	db, _ := e.db.Connect()
 
 	event, err := e.eventUsecase.FindByID(db, id)
 	if err != nil {
@@ -34,7 +34,7 @@ func (e *eventInteractor) Get(id int) (*models.Events, *usecase.ResultStatus) {
 
 func (e *eventInteractor) GetList() ([]*models.EventsReponse, *usecase.ResultStatus) {
 
-	db := e.db.Connect()
+	db, _ := e.db.Connect()
 
 	events, err := e.eventUsecase.Find(db)
 	if err != nil {
@@ -51,7 +51,7 @@ func (e *eventInteractor) GetList() ([]*models.EventsReponse, *usecase.ResultSta
 
 func (e *eventInteractor) Create(event *models.Events) (*models.EventsReponse, *usecase.ResultStatus) {
 
-	db := e.db.Connect()
+	db, _ := e.db.Connect()
 
 	newEvent, err := e.eventUsecase.Create(db, event)
 	if err != nil {

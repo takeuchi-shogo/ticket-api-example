@@ -23,7 +23,7 @@ func (u *UserRepository) FindByID(id int) (*models.Users, error) {
 	}, nil
 }
 
-func (u *UserRepository) FindByEmail(db *bun.DB, email string) (*models.Users, error) {
+func (u *UserRepository) FindByEmail(db bun.IDB, email string) (*models.Users, error) {
 	user := &models.Users{}
 	fmt.Println(email)
 	ctx := context.Background()
@@ -34,7 +34,7 @@ func (u *UserRepository) FindByEmail(db *bun.DB, email string) (*models.Users, e
 	return user, nil
 }
 
-func (u *UserRepository) Create(db *bun.DB, user *models.Users) (*models.Users, error) {
+func (u *UserRepository) Create(db bun.IDB, user *models.Users) (*models.Users, error) {
 	ctx := context.Background()
 
 	user.CreatedAt = time.Now().Unix()

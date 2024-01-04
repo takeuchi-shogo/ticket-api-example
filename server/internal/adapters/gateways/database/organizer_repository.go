@@ -15,7 +15,7 @@ func NewOrganizerRepository() usecase.OrganizerUsecase {
 	return &organizerRepository{}
 }
 
-func (o *organizerRepository) FindByID(db *bun.DB, id int) (*models.Organizers, error) {
+func (o *organizerRepository) FindByID(db bun.IDB, id int) (*models.Organizers, error) {
 	ctx := context.Background()
 
 	organizer := &models.Organizers{}
@@ -28,7 +28,7 @@ func (o *organizerRepository) FindByID(db *bun.DB, id int) (*models.Organizers, 
 	return organizer, nil
 }
 
-func (o *organizerRepository) Create(db *bun.DB, organizer *models.Organizers) (*models.Organizers, error) {
+func (o *organizerRepository) Create(db bun.IDB, organizer *models.Organizers) (*models.Organizers, error) {
 	ctx := context.Background()
 
 	_, err := db.NewInsert().Model(organizer).Exec(ctx)

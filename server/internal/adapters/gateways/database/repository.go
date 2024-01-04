@@ -7,6 +7,7 @@ var Module = fx.Options(
 		NewAdministratorRepository,
 		NewEventRepository,
 		NewOrganizerRepository,
+		NewRegisterEmailRepository,
 		NewTicketRepository,
 		NewUserRepository,
 	),

@@ -2,18 +2,18 @@ package controllers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/presenters"
 	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase/services"
-	"github.com/takeuchi-shogo/ticket-api/pkg/constants"
-	"github.com/takeuchi-shogo/ticket-api/pkg/token"
 )
 
 type AuthController interface {
-	Signin(ctx Context)
+	RegisterEmail(ctx Context)
+	VerifyCode(ctx Context)
 	Signup(ctx Context)
+	Signin(ctx Context)
+	Logout(ctx Context)
 }
 
 type authController struct {
@@ -26,18 +26,55 @@ func NewAuthController(s services.AuthService) AuthController {
 	}
 }
 
-func (a *authController) Signin(ctx Context) {
+func (a *authController) RegisterEmail(ctx Context) {
+	email := ctx.PostForm("email")
 
-	authPayload := ctx.MustGet(constants.AuthorizationPayloadKey).(*token.CustomClaims)
-
-	userID, _ := strconv.Atoi(authPayload.ID)
-
-	user, res := a.authService.Verify(userID)
+	res := a.authService.RegisterEmail(email)
 	if res.Err != nil {
 		ctx.JSON(res.StatusCode, presenters.ErrResponse{ErrorMessage: res.Err.Error()})
+	}
+	ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: nil})
+}
+
+func (a *authController) VerifyCode(ctx Context) {
+
+	token := ctx.PostForm("token")
+	pinCode := ctx.PostForm("pin_code")
+
+	res := a.authService.VerifyCode(&models.RegisterEmails{
+		Token:   token,
+		PinCode: pinCode,
+	})
+	if res.Err != nil {
+		ctx.JSON(res.StatusCode, presenters.ErrResponse{ErrorMessage: res.Err.Error()})
+	}
+	ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: nil})
+}
+
+func (a *authController) Signin(ctx Context) {
+
+	email := ctx.PostForm("email")
+	pass := ctx.PostForm("password")
+
+	user := &models.Users{
+		Email:    email,
+		Password: pass,
+	}
+
+	// if err := ctx.BindJSON(user); err != nil {
+	// 	ctx.JSON(http.StatusBadRequest, presenters.NewErrResponse(err.Error()))
+	// 	return
+	// }
+
+	_, res := a.authService.Login(user)
+	if res.Err != nil {
+		ctx.JSON(res.StatusCode, presenters.NewErrResponse(res.Err.Error()))
 		return
 	}
-	ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: user})
+
+	// ctx.Header(constants.AuthorizationHeaderKey, foundUser.Token)
+
+	// ctx.JSON(res.StatusCode, presenters.NewResponse(foundUser.User))
 }
 
 func (a *authController) Signup(ctx Context) {
@@ -55,4 +92,8 @@ func (a *authController) Signup(ctx Context) {
 		return
 	}
 	ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: user})
+}
+
+func (a *authController) Logout(ctx Context) {
+
 }

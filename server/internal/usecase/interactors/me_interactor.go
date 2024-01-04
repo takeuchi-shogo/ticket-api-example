@@ -36,7 +36,7 @@ type MeInteractorResponse struct {
 
 func (m *meInteractor) Get(user *models.Users) (*models.MeInteractorResponse, *usecase.ResultStatus) {
 
-	db := m.db.Connect()
+	db, _ := m.db.Connect()
 
 	foundUser, err := m.user.FindByEmail(db, user.Email)
 	if err != nil {
@@ -69,7 +69,7 @@ func (m *meInteractor) Get(user *models.Users) (*models.MeInteractorResponse, *u
 
 func (m *meInteractor) Create(user *models.Users) (*models.MeInteractorResponse, *usecase.ResultStatus) {
 
-	db := m.db.Connect()
+	db, _ := m.db.Connect()
 
 	generatePassword, err := password.GenerateFromPassword(user.Password)
 	if err != nil {

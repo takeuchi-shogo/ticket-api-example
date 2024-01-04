@@ -83,8 +83,9 @@ func dbOpen(dsn string) (*sql.DB, error) {
 	return sql.Open("mysql", dsn)
 }
 
-func (db *DB) Connect() *bun.DB {
-	return db.Connection
+func (db *DB) Connect() (bun.Conn, error) {
+	ctx := context.Background()
+	return db.Connection.Conn(ctx)
 }
 
 // Start a Transaction

@@ -16,7 +16,7 @@ func NewEventRepository() usecase.EventUsecase {
 	return &eventRepository{}
 }
 
-func (e *eventRepository) Find(db *bun.DB) ([]*models.Events, error) {
+func (e *eventRepository) Find(db bun.IDB) ([]*models.Events, error) {
 
 	events := []*models.Events{}
 
@@ -28,7 +28,7 @@ func (e *eventRepository) Find(db *bun.DB) ([]*models.Events, error) {
 	return events, nil
 }
 
-func (e *eventRepository) FindByID(db *bun.DB, id int) (*models.Events, error) {
+func (e *eventRepository) FindByID(db bun.IDB, id int) (*models.Events, error) {
 	event := &models.Events{}
 
 	ctx := context.Background()
@@ -40,7 +40,7 @@ func (e *eventRepository) FindByID(db *bun.DB, id int) (*models.Events, error) {
 	return event, nil
 }
 
-func (e *eventRepository) Create(db *bun.DB, event *models.Events) (*models.Events, error) {
+func (e *eventRepository) Create(db bun.IDB, event *models.Events) (*models.Events, error) {
 	ctx := context.Background()
 
 	event.CreatedAt = time.Now().Unix()

@@ -74,8 +74,11 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 	r.cors(&config)
 
 	// ハンドラーをGinに登録する
-	r.Gin.POST("/signin", func(ctx *gin.Context) { c.auth.Signin(ctx) })
+	r.Gin.POST("/registerEmails", func(ctx *gin.Context) { c.auth.RegisterEmail(ctx) })
+	r.Gin.POST("/verifyCode", func(ctx *gin.Context) { c.auth.VerifyCode(ctx) })
 	r.Gin.POST("/signup", func(ctx *gin.Context) { c.auth.Signup(ctx) })
+	r.Gin.POST("/signin", func(ctx *gin.Context) { c.auth.Signin(ctx) })
+	r.Gin.POST("/logout", func(ctx *gin.Context) { c.auth.Logout(ctx) })
 
 	r.Gin.GET("/events", func(ctx *gin.Context) { c.event.GetList(ctx) })
 	r.Gin.POST("/events", func(ctx *gin.Context) { c.event.Post(ctx) })

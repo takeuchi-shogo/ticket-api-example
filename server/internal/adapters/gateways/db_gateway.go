@@ -6,7 +6,7 @@ import (
 )
 
 type DB interface {
-	Connect() *bun.DB
+	Connect() (bun.Conn, error)
 	Transaction() (bun.Tx, error)
 }
 
@@ -18,7 +18,7 @@ func NewDBGateway(db DB) usecase.DBUsecase {
 	return &DBGateway{DB: db}
 }
 
-func (g *DBGateway) Connect() *bun.DB {
+func (g *DBGateway) Connect() (bun.Conn, error) {
 	return g.DB.Connect()
 }
 

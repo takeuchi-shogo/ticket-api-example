@@ -6,7 +6,7 @@ import (
 )
 
 type EventUsecase interface {
-	Find(db *bun.DB) ([]*models.Events, error)
-	FindByID(db *bun.DB, id int) (*models.Events, error)
-	Create(db *bun.DB, event *models.Events) (*models.Events, error)
+	Find(db bun.IDB) ([]*models.Events, error)
+	FindByID(db bun.IDB, id int) (*models.Events, error)
+	Create(db bun.IDB, event *models.Events) (*models.Events, error)
 }

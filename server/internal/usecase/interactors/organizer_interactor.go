@@ -27,7 +27,7 @@ func (o *organizerInteractor) Get(id int) (*models.OrganizersResponse, *usecase.
 }
 
 func (o *organizerInteractor) Create(organizer *models.Organizers) (*models.OrganizersResponse, *usecase.ResultStatus) {
-	db := o.db.Connect()
+	db, _ := o.db.Connect()
 
 	buildPassword, err := password.GenerateFromPassword(organizer.Password)
 	if err != nil {

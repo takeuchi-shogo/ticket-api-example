@@ -7,6 +7,6 @@ import (
 
 type UserUsecase interface {
 	FindByID(id int) (*models.Users, error)
-	FindByEmail(db *bun.DB, email string) (*models.Users, error)
-	Create(db *bun.DB, user *models.Users) (*models.Users, error)
+	FindByEmail(db bun.IDB, email string) (*models.Users, error)
+	Create(db bun.IDB, user *models.Users) (*models.Users, error)
 }
