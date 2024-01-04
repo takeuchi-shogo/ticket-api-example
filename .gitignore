@@ -1,6 +1,6 @@
 .env
 
-/api/config/config.go
+server/auth/cert/*.pem
 
 mysql/data
 
