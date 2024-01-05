@@ -18,9 +18,9 @@ func NewUserInteractor(
 }
 
 func (u *UserInteractor) Get(id int) (*models.Users, error) {
-	user, err := u.UserRepository.FindByID(id)
-	if err != nil {
-		return &models.Users{}, err
-	}
-	return user, nil
+	// user, err := u.UserRepository.FindByID(id)
+	// if err != nil {
+	// 	return &models.Users{}, err
+	// }
+	return &models.Users{}, nil
 }

@@ -2,7 +2,6 @@ package token
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -59,6 +58,8 @@ func (jm *JwtMaker) GenerateJWT(userID string) (string, error) {
 		},
 	}
 
+	claims.UserID = userID
+
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
 	signKey, err := jwt.ParseRSAPrivateKeyFromPEM(jm.PrivateKey)
@@ -88,8 +89,6 @@ func extractBearerToken(header string) (string, error) {
 	if header == "" {
 		return "", errors.New("bad header value given")
 	}
-
-	fmt.Println(header)
 
 	jwtToken := strings.Split(header, ".")
 	if len(jwtToken) != 3 {

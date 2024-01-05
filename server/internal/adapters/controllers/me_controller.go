@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/presenters"
 	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
@@ -28,9 +28,6 @@ func NewMeController(me services.MeService) MeController {
 }
 
 func (m *meController) Get(ctx Context) {
-
-	// email := ctx.Query("email")
-	// pass := ctx.Query("password")
 
 	user := &models.Users{}
 
@@ -74,5 +71,13 @@ func (m *meController) GetMe(ctx Context) {
 
 	authPayload := ctx.MustGet(constants.AuthorizationPayloadKey).(*token.CustomClaims)
 
-	fmt.Printf("%+v", authPayload)
+	userID, _ := strconv.Atoi(authPayload.UserID)
+
+	foundUser, res := m.me.GetMe(userID)
+	if res.Err != nil {
+		ctx.JSON(res.StatusCode, presenters.NewErrResponse(res.Err.Error()))
+		return
+	}
+
+	ctx.JSON(res.StatusCode, presenters.NewResponse(foundUser))
 }

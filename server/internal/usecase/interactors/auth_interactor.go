@@ -4,30 +4,35 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase/services"
+	"github.com/takeuchi-shogo/ticket-api/pkg/password"
 	"github.com/takeuchi-shogo/ticket-api/pkg/random"
 	"github.com/takeuchi-shogo/ticket-api/pkg/token"
 )
 
 type authInteractor struct {
-	DB            usecase.DBUsecase
+	db            usecase.DBUsecase
 	jwt           token.JwtMakerInterface
 	registerEmail usecase.RegisterEmailUsecase
+	user          usecase.UserUsecase
 }
 
 func NewAuthInteractor(
 	db usecase.DBUsecase,
 	jwt token.JwtMakerInterface,
 	registerEmail usecase.RegisterEmailUsecase,
+	user usecase.UserUsecase,
 ) services.AuthService {
 	return &authInteractor{
-		DB:            db,
+		db:            db,
 		jwt:           jwt,
 		registerEmail: registerEmail,
+		user:          user,
 	}
 }
 
@@ -59,7 +64,7 @@ func (a *authInteractor) RegisterEmail(email string) *usecase.ResultStatus {
 
 func (a *authInteractor) VerifyCode(registerEmail *models.RegisterEmails) *usecase.ResultStatus {
 
-	db, err := a.DB.Connect()
+	db, err := a.db.Connect()
 	if err != nil {
 		return usecase.NewResultStatus(http.StatusInternalServerError, err)
 	}
@@ -90,22 +95,58 @@ func (a *authInteractor) Verify(userID int) (*models.Users, *usecase.ResultStatu
 	return &models.Users{}, usecase.NewResultStatus(200, nil)
 }
 
-func (a *authInteractor) Login(user *models.Users) (*models.Users, *usecase.ResultStatus) {
-	fmt.Println(user)
+func (a *authInteractor) Login(user *models.Users) (*models.MeInteractorResponse, *usecase.ResultStatus) {
+	db, _ := a.db.Connect()
 
-	// _ = a.DB.Connect()
-
-	return &models.Users{}, usecase.NewResultStatus(200, nil)
-}
-
-func (a *authInteractor) Create(*models.Users) (*models.Users, *usecase.ResultStatus) {
-
-	jwtToken, err := a.jwt.GenerateJWT("1")
-	fmt.Println("interactor")
+	foundUser, err := a.user.FindByEmail(db, user.Email)
 	if err != nil {
-		return &models.Users{}, usecase.NewResultStatus(http.StatusUnauthorized, err)
+		return &models.MeInteractorResponse{
+			User:  &models.UsersResponse{},
+			Token: "",
+		}, usecase.NewResultStatus(http.StatusBadRequest, errors.New("メールアドレス、またはパスワードが違います"))
 	}
 
-	fmt.Println(jwtToken)
-	return &models.Users{}, usecase.NewResultStatus(http.StatusOK, nil)
+	if err := password.CheckPassword(user.Password, foundUser.Password); err != nil {
+		return &models.MeInteractorResponse{
+			User:  &models.UsersResponse{},
+			Token: "",
+		}, usecase.NewResultStatus(http.StatusUnauthorized, errors.New("メールアドレス、またはパスワードが違います"))
+	}
+
+	userID := strconv.Itoa(int(user.ID))
+
+	token, err := a.jwt.GenerateJWT(userID)
+	if err != nil {
+		return &models.MeInteractorResponse{
+			User:  &models.UsersResponse{},
+			Token: "",
+		}, usecase.NewResultStatus(http.StatusBadRequest, err)
+	}
+
+	return &models.MeInteractorResponse{
+		User:  foundUser.BuildForGet(),
+		Token: token,
+	}, usecase.NewResultStatus(http.StatusOK, nil)
+}
+
+func (a *authInteractor) Create(user *models.Users) (*models.Users, string, *usecase.ResultStatus) {
+
+	db, _ := a.db.Transaction()
+
+	newUser, err := a.user.Create(db, user)
+	if err != nil {
+		db.Rollback()
+		return &models.Users{}, "", usecase.NewResultStatus(http.StatusUnauthorized, err)
+	}
+
+	userID := strconv.Itoa(int(newUser.ID))
+
+	jwtToken, err := a.jwt.GenerateJWT(userID)
+	if err != nil {
+		db.Rollback()
+		return &models.Users{}, "", usecase.NewResultStatus(http.StatusUnauthorized, err)
+	}
+
+	db.Commit()
+	return newUser, jwtToken, usecase.NewResultStatus(http.StatusOK, nil)
 }

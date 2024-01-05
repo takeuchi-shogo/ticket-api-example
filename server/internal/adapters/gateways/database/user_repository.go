@@ -17,10 +17,13 @@ func NewUserRepository() usecase.UserUsecase {
 	return &UserRepository{}
 }
 
-func (u *UserRepository) FindByID(id int) (*models.Users, error) {
-	return &models.Users{
-		ID: uint64(id),
-	}, nil
+func (u *UserRepository) FindByID(db bun.IDB, id int) (*models.Users, error) {
+	user := &models.Users{}
+	err := db.NewSelect().Model(user).Where("id = ?", id).Scan(context.Background())
+	if err != nil {
+		return &models.Users{}, errors.New("user is not found")
+	}
+	return user, nil
 }
 
 func (u *UserRepository) FindByEmail(db bun.IDB, email string) (*models.Users, error) {

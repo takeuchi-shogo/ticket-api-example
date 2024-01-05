@@ -86,7 +86,7 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 	r.Gin.POST("/events", func(ctx *gin.Context) { c.event.Post(ctx) })
 	r.Gin.GET("/events/:id", func(ctx *gin.Context) { c.event.Get(ctx) })
 
-	r.Gin.POST("/login", func(ctx *gin.Context) { c.me.Get(ctx) })
+	// r.Gin.POST("/login", func(ctx *gin.Context) { c.me.Get(ctx) })
 	r.Gin.POST("/me", func(ctx *gin.Context) { c.me.Post(ctx) })
 
 	r.Gin.POST("/organizers", func(ctx *gin.Context) { c.organizer.Post(ctx) })

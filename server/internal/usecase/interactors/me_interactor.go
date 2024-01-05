@@ -103,6 +103,18 @@ func (m *meInteractor) Create(user *models.Users) (*models.MeInteractorResponse,
 	}, usecase.NewResultStatus(http.StatusOK, nil)
 }
 
+func (m *meInteractor) GetMe(userID int) (*models.UsersResponse, *usecase.ResultStatus) {
+
+	db, _ := m.db.Connect()
+
+	foundUser, err := m.user.FindByID(db, userID)
+	if err != nil {
+		return &models.UsersResponse{}, usecase.NewResultStatus(http.StatusBadRequest, err)
+	}
+
+	return foundUser.BuildForGet(), usecase.NewResultStatus(http.StatusOK, nil)
+}
+
 func (m *meInteractor) generateJWT(userID int) (string, error) {
 	id := int(userID)
 

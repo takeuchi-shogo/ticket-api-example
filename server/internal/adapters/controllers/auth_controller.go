@@ -6,6 +6,7 @@ import (
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/presenters"
 	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase/services"
+	"github.com/takeuchi-shogo/ticket-api/pkg/constants"
 )
 
 type AuthController interface {
@@ -27,6 +28,7 @@ func NewAuthController(s services.AuthService) AuthController {
 }
 
 func (a *authController) RegisterEmail(ctx Context) {
+
 	email := ctx.PostForm("email")
 
 	res := a.authService.RegisterEmail(email)
@@ -61,20 +63,15 @@ func (a *authController) Signin(ctx Context) {
 		Password: pass,
 	}
 
-	// if err := ctx.BindJSON(user); err != nil {
-	// 	ctx.JSON(http.StatusBadRequest, presenters.NewErrResponse(err.Error()))
-	// 	return
-	// }
-
-	_, res := a.authService.Login(user)
+	foundUser, res := a.authService.Login(user)
 	if res.Err != nil {
 		ctx.JSON(res.StatusCode, presenters.NewErrResponse(res.Err.Error()))
 		return
 	}
 
-	// ctx.Header(constants.AuthorizationHeaderKey, foundUser.Token)
+	ctx.Header(constants.AuthorizationHeaderKey, foundUser.Token)
 
-	// ctx.JSON(res.StatusCode, presenters.NewResponse(foundUser.User))
+	ctx.JSON(res.StatusCode, presenters.NewResponse(foundUser.User))
 }
 
 func (a *authController) Signup(ctx Context) {
@@ -86,11 +83,14 @@ func (a *authController) Signup(ctx Context) {
 		return
 	}
 
-	user, res := a.authService.Create(u)
+	user, token, res := a.authService.Create(u)
 	if res.Err != nil {
 		ctx.JSON(res.StatusCode, presenters.ErrResponse{ErrorMessage: res.Err.Error()})
 		return
 	}
+
+	ctx.Header(constants.AuthorizationHeaderKey, token)
+
 	ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: user})
 }
 
