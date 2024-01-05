@@ -1,17 +1,20 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/presenters"
 	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase/services"
 	"github.com/takeuchi-shogo/ticket-api/pkg/constants"
+	"github.com/takeuchi-shogo/ticket-api/pkg/token"
 )
 
 type MeController interface {
 	Get(ctx Context)
 	Post(ctx Context)
+	GetMe(ctx Context)
 }
 
 type meController struct {
@@ -65,4 +68,11 @@ func (m *meController) Post(ctx Context) {
 	ctx.Header(constants.AuthorizationHeaderKey, newUser.Token)
 
 	ctx.JSON(res.StatusCode, presenters.NewResponse(newUser.User))
+}
+
+func (m *meController) GetMe(ctx Context) {
+
+	authPayload := ctx.MustGet(constants.AuthorizationPayloadKey).(*token.CustomClaims)
+
+	fmt.Printf("%+v", authPayload)
 }

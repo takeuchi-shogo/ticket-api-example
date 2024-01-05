@@ -2,12 +2,14 @@ package token
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
 	"go.uber.org/fx"
 
+	"github.com/takeuchi-shogo/ticket-api/auth"
 	"github.com/takeuchi-shogo/ticket-api/config"
 	"github.com/takeuchi-shogo/ticket-api/pkg/uuid"
 )
@@ -21,8 +23,8 @@ type JwtMakerInterface interface {
 type JwtMaker struct {
 	ApplicationName string
 	TokenExpireAt   time.Duration
-	PublicKey       string
-	PrivateKey      string
+	PublicKey       []byte
+	PrivateKey      []byte
 }
 
 var Module = fx.Options(
@@ -36,7 +38,9 @@ type CustomClaims struct {
 
 func NewJwtMaker(c config.ServerConfig) JwtMakerInterface {
 	return &JwtMaker{
-		PrivateKey: "test",
+		TokenExpireAt: 15 * time.Minute,
+		PublicKey:     auth.RawPublicKey,
+		PrivateKey:    auth.RawPrivateKey,
 	}
 }
 
@@ -55,8 +59,14 @@ func (jm *JwtMaker) GenerateJWT(userID string) (string, error) {
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(jm.PrivateKey))
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+
+	signKey, err := jwt.ParseRSAPrivateKeyFromPEM(jm.PrivateKey)
+	if err != nil {
+		return "", err
+	}
+
+	tokenString, err := token.SignedString(signKey)
 	if err != nil {
 		return "", err
 	}
@@ -79,6 +89,8 @@ func extractBearerToken(header string) (string, error) {
 		return "", errors.New("bad header value given")
 	}
 
+	fmt.Println(header)
+
 	jwtToken := strings.Split(header, ".")
 	if len(jwtToken) != 3 {
 		return "", errors.New("incorrectly formatted authorization header")
@@ -89,7 +101,11 @@ func extractBearerToken(header string) (string, error) {
 
 func (jm *JwtMaker) parseToken(jwtToken string) (*CustomClaims, error) {
 	token, _ := jwt.ParseWithClaims(jwtToken, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(jm.PrivateKey), nil
+		key, err := jwt.ParseRSAPublicKeyFromPEM(jm.PublicKey)
+		if err != nil {
+			return nil, err
+		}
+		return key, nil
 	})
 
 	claims := token.Claims.(*CustomClaims)
@@ -99,7 +115,7 @@ func (jm *JwtMaker) parseToken(jwtToken string) (*CustomClaims, error) {
 func (c *CustomClaims) Validate() error {
 	n := c.RegisteredClaims.ExpiresAt.Time
 	t := time.Now()
-	if n.After(t) {
+	if t.After(n) {
 		return errors.New("有効期限が切れています")
 	}
 	return nil

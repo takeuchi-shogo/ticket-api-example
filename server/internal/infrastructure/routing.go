@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/takeuchi-shogo/ticket-api/config"
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/controllers"
+	"github.com/takeuchi-shogo/ticket-api/internal/infrastructure/middleware"
+	"github.com/takeuchi-shogo/ticket-api/pkg/token"
 )
 
 const (
@@ -93,6 +95,11 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 	r.Gin.GET("/tickets/:id", func(ctx *gin.Context) { c.ticket.Get(ctx) })
 
 	r.Gin.GET("/users/:id", func(ctx *gin.Context) { c.user.Get(ctx) })
+
+	v1Auth := r.Gin.Use(middleware.JwtAuthMiddleware(token.NewJwtMaker(config)))
+	{
+		v1Auth.GET("/me", func(ctx *gin.Context) { c.me.GetMe(ctx) })
+	}
 
 	v1Admin := r.Gin.Group("/admin")
 	{

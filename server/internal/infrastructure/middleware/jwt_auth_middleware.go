@@ -22,7 +22,7 @@ func JwtAuthMiddleware(jwtMaker token.JwtMakerInterface) gin.HandlerFunc {
 		if len(authHandler) == 0 {
 			err := errors.New("authorization header is not provided")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
@@ -31,24 +31,24 @@ func JwtAuthMiddleware(jwtMaker token.JwtMakerInterface) gin.HandlerFunc {
 		if len(fields) < 2 {
 			err := errors.New("invalid authorization header format")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
 
-		accessToken := fields[0]
+		accessToken := fields[1]
 
 		payload, err := jwtMaker.VerifyJwtToken(accessToken)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
 
 		if payload.Validate() != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": err,
+				"error": "無効なトークンです",
 			})
 			return
 		}
