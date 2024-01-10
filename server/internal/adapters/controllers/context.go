@@ -2,6 +2,7 @@ package controllers
 
 type Context interface {
 	BindJSON(obj interface{}) error
+	GetPostForm(key string) (string, bool)
 	Header(key, value string)
 	JSON(code int, obj interface{})
 	MustGet(key string) interface{}

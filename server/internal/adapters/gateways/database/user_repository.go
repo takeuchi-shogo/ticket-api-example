@@ -49,3 +49,15 @@ func (u *UserRepository) Create(db bun.IDB, user *models.Users) (*models.Users, 
 	}
 	return user, nil
 }
+
+func (u *UserRepository) Save(db bun.IDB, user *models.Users) (*models.Users, error) {
+
+	user.UpdatedAt = time.Now().Unix()
+
+	_, err := db.NewUpdate().
+		Model(user).
+		WherePK().
+		Exec(context.Background())
+
+	return user, err
+}

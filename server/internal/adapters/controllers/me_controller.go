@@ -15,6 +15,7 @@ type MeController interface {
 	Get(ctx Context)
 	Post(ctx Context)
 	GetMe(ctx Context)
+	Patch(ctx Context)
 }
 
 type meController struct {
@@ -80,4 +81,27 @@ func (m *meController) GetMe(ctx Context) {
 	}
 
 	ctx.JSON(res.StatusCode, presenters.NewResponse(foundUser))
+}
+
+func (m *meController) Patch(ctx Context) {
+
+	authPayload := ctx.MustGet(constants.AuthorizationPayloadKey).(*token.CustomClaims)
+
+	id, _ := strconv.ParseUint(authPayload.UserID, 10, 64)
+
+	user := &models.Users{
+		ID: id,
+	}
+
+	if displayName, ok := ctx.GetPostForm("displayName"); ok {
+		user.DisplayName = displayName
+	}
+
+	me, res := m.me.Save(user)
+	if res.Err != nil {
+		ctx.JSON(res.StatusCode, presenters.NewErrResponse(res.Err.Error()))
+		return
+	}
+
+	ctx.JSON(res.StatusCode, presenters.NewResponse(me))
 }

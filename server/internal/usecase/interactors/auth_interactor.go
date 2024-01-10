@@ -113,7 +113,8 @@ func (a *authInteractor) Login(user *models.Users) (*models.MeInteractorResponse
 		}, usecase.NewResultStatus(http.StatusUnauthorized, errors.New("メールアドレス、またはパスワードが違います"))
 	}
 
-	userID := strconv.Itoa(int(user.ID))
+	userID := strconv.FormatUint(foundUser.ID, 10)
+	fmt.Println(userID)
 
 	token, err := a.jwt.GenerateJWT(userID)
 	if err != nil {

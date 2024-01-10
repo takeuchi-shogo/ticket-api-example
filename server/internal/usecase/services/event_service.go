@@ -8,5 +8,6 @@ import (
 type EventService interface {
 	Get(id int) (*models.Events, *usecase.ResultStatus)
 	GetList() ([]*models.EventsReponse, *usecase.ResultStatus)
+	GetListByArtistID(eventID, artistID int) (*models.EventInteractorResponse, *usecase.ResultStatus)
 	Create(event *models.Events) (*models.EventsReponse, *usecase.ResultStatus)
 }

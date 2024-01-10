@@ -3,6 +3,7 @@ package models
 type Events struct {
 	ID                int     `json:"id"`
 	OrganizerID       int     `json:"organizer_id"`
+	ArtistID          int     `json:"artist_id"`
 	VenueID           *int    `json:"venue_id"`
 	Title             string  `json:"title"`
 	PerformancePeriod string  `json:"performance_period"`
@@ -21,6 +22,7 @@ type Events struct {
 type EventsReponse struct {
 	ID                int     `json:"id"`
 	OrganizerID       int     `json:"organizer_id"`
+	ArtistID          int     `json:"artist_id"`
 	VenueID           *int    `json:"venue_id"`
 	Title             string  `json:"title"`
 	PerformancePeriod string  `json:"performance_period"`
@@ -32,10 +34,16 @@ type EventsReponse struct {
 	IsPrivate         bool    `json:"is_private"`
 }
 
+type EventInteractorResponse struct {
+	Total  int              `json:"total"`
+	Events []*EventsReponse `json:"events"`
+}
+
 func (e *Events) BuildFor() *EventsReponse {
 	return &EventsReponse{
 		ID:                e.ID,
 		OrganizerID:       e.OrganizerID,
+		ArtistID:          e.ArtistID,
 		VenueID:           e.VenueID,
 		Title:             e.Title,
 		PerformancePeriod: e.PerformancePeriod,

@@ -9,33 +9,29 @@ import (
 	"github.com/uptrace/bun"
 )
 
-type TicketRepository struct {
+type TicketItemRepository struct{}
+
+func NewTicketItemRepository() usecase.TicketItemUsecase {
+	return &TicketItemRepository{}
 }
 
-func NewTicketRepository() usecase.TicketUsecase {
-	return &TicketRepository{}
-}
-
-func (t *TicketRepository) FindByID(db bun.IDB, id int) (*models.Tickets, error) {
-	ticket := &models.Tickets{}
+func (t *TicketItemRepository) FindByID(db bun.IDB, id int) (*models.TicketItems, error) {
+	ticket := &models.TicketItems{}
 	if err := db.NewSelect().
 		Model(ticket).
 		Where("id = ?", id).
 		Scan(context.Background()); err != nil {
-		return &models.Tickets{}, err
+		return &models.TicketItems{}, err
 	}
 	return ticket, nil
 }
 
-func (t *TicketRepository) Create(db bun.IDB, ticket *models.Tickets) (*models.Tickets, error) {
+func (t *TicketItemRepository) Create(db bun.IDB, ticket *models.TicketItems) (*models.TicketItems, error) {
 
 	ticket.CreatedAt = time.Now().Unix()
 	ticket.UpdatedAt = time.Now().Unix()
 
 	_, err := db.NewInsert().Model(ticket).Exec(context.Background())
-	if err != nil {
-		return &models.Tickets{}, err
-	}
 
 	return ticket, err
 }

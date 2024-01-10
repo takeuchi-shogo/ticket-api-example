@@ -124,3 +124,22 @@ func (m *meInteractor) generateJWT(userID int) (string, error) {
 	}
 	return token, nil
 }
+
+func (m *meInteractor) Save(user *models.Users) (*models.UsersResponse, *usecase.ResultStatus) {
+
+	db, _ := m.db.Connect()
+
+	foundUser, err := m.user.FindByID(db, int(user.ID))
+	if err != nil {
+		return &models.UsersResponse{}, usecase.NewResultStatus(http.StatusBadRequest, err)
+	}
+
+	foundUser.DisplayName = user.DisplayName
+
+	updatedUser, err := m.user.Save(db, foundUser)
+	if err != nil {
+		return &models.UsersResponse{}, usecase.NewResultStatus(http.StatusBadRequest, err)
+	}
+
+	return updatedUser.BuildForGet(), usecase.NewResultStatus(http.StatusOK, nil)
+}

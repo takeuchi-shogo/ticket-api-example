@@ -47,7 +47,7 @@ func JwtAuthMiddleware(jwtMaker token.JwtMakerInterface) gin.HandlerFunc {
 		}
 
 		if payload.Validate() != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			ctx.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{
 				"error": "無効なトークンです",
 			})
 			return

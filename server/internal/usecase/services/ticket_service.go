@@ -7,4 +7,5 @@ import (
 
 type TicketService interface {
 	Get(id int) (*models.TicketsResponse, *usecase.ResultStatus)
+	Create(ticket *models.Tickets) (*models.TicketsResponse, *usecase.ResultStatus)
 }

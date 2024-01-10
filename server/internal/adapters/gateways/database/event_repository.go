@@ -16,6 +16,14 @@ func NewEventRepository() usecase.EventUsecase {
 	return &eventRepository{}
 }
 
+func (e *eventRepository) CountEventByArtistID(db bun.IDB, artistID int) (int, error) {
+	count, err := db.NewSelect().Model((*models.Events)(nil)).Count(context.Background())
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (e *eventRepository) Find(db bun.IDB) ([]*models.Events, error) {
 
 	events := []*models.Events{}
@@ -38,6 +46,17 @@ func (e *eventRepository) FindByID(db bun.IDB, id int) (*models.Events, error) {
 		return &models.Events{}, errors.New("event is not found")
 	}
 	return event, nil
+}
+
+func (e *eventRepository) FindByArtistID(db bun.IDB, artistID int) ([]*models.Events, error) {
+	events := []*models.Events{}
+
+	ctx := context.Background()
+	_ = db.NewSelect().Model(&events).Where("artist_id = ?", artistID).Scan(ctx)
+	if len(events) <= 0 {
+		return []*models.Events{}, errors.New("events is not found")
+	}
+	return events, nil
 }
 
 func (e *eventRepository) Create(db bun.IDB, event *models.Events) (*models.Events, error) {

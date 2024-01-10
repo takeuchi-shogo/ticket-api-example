@@ -12,6 +12,7 @@ import (
 type EventController interface {
 	Get(ctx Context)
 	GetList(ctx Context)
+	GetListByArtistID(ctx Context)
 	Post(ctx Context)
 }
 
@@ -47,7 +48,20 @@ func (e *eventsController) GetList(ctx Context) {
 	}
 
 	ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: events})
+}
 
+func (e *eventsController) GetListByArtistID(ctx Context) {
+
+	eventID, _ := strconv.Atoi(ctx.Param("eventID"))
+	artistID, _ := strconv.Atoi(ctx.Param("artistID"))
+
+	events, res := e.eventService.GetListByArtistID(eventID, artistID)
+	if res.Err != nil {
+		ctx.JSON(res.StatusCode, presenters.Response{Message: res.Err.Error(), Data: nil})
+		return
+	}
+
+	ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: events})
 }
 
 func (e *eventsController) Post(ctx Context) {
