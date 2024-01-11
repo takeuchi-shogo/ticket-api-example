@@ -5,6 +5,7 @@ type Tickets struct {
 	Title                  string  `json:"title"`
 	EventID                int     `json:"event_id"`
 	VenueID                *int    `json:"venue_id"`
+	PerformanceDate        int64   `json:"performance_date"`
 	Note                   *string `json:"note"`
 	SaleType               string  `json:"sale_type"`
 	StartAt                int64   `json:"start_at"`
@@ -22,6 +23,7 @@ type TicketsResponse struct {
 	Title                  string  `json:"title"`
 	EventID                int     `json:"event_id"`
 	VenueID                *int    `json:"venue_id"`
+	PerformanceDate        int64   `json:"performance_date"`
 	Note                   *string `json:"note"`
 	SaleType               string  `json:"sale_type"`
 	StartAt                int64   `json:"start_at"`
@@ -33,12 +35,18 @@ type TicketsResponse struct {
 	TicketItems []*TicketItemsResponse `json:"ticket_items"`
 }
 
+type TicketInteractorResponse struct {
+	Tickets []*TicketsResponse `json:"tickets"`
+	Total   int                `json:"total"`
+}
+
 func (t *Tickets) BuildForGet() *TicketsResponse {
 	return &TicketsResponse{
 		ID:                     t.ID,
 		Title:                  t.Title,
 		EventID:                t.EventID,
 		VenueID:                t.VenueID,
+		PerformanceDate:        t.PerformanceDate,
 		Note:                   t.Note,
 		SaleType:               t.SaleType,
 		StartAt:                t.StartAt,

@@ -35,6 +35,7 @@ type Controllers struct {
 	admin         controllers.AdministratorsController
 	artist        controllers.ArtistsController
 	auth          controllers.AuthController
+	buy           controllers.BuyController
 	event         controllers.EventController
 	me            controllers.MeController
 	organizer     controllers.OrganizersController
@@ -48,6 +49,7 @@ func NewControllers(
 	ad controllers.AdministratorsController,
 	ar controllers.ArtistsController,
 	a controllers.AuthController,
+	b controllers.BuyController,
 	e controllers.EventController,
 	me controllers.MeController,
 	o controllers.OrganizersController,
@@ -61,6 +63,7 @@ func NewControllers(
 		artist:        ar,
 		auth:          a,
 		event:         e,
+		buy:           b,
 		me:            me,
 		organizer:     o,
 		ticket:        t,
@@ -97,6 +100,7 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 	r.Gin.POST("/signin", func(ctx *gin.Context) { c.auth.Signin(ctx) })
 	r.Gin.POST("/logout", func(ctx *gin.Context) { c.auth.Logout(ctx) })
 
+	r.Gin.POST("/buy", func(ctx *gin.Context) { c.buy.Post(ctx) })
 	r.Gin.GET("/events", func(ctx *gin.Context) { c.event.GetList(ctx) })
 	r.Gin.POST("/events", func(ctx *gin.Context) { c.event.Post(ctx) })
 	r.Gin.GET("/events/:id", func(ctx *gin.Context) { c.event.Get(ctx) })
@@ -107,6 +111,7 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 	r.Gin.POST("/organizers", func(ctx *gin.Context) { c.organizer.Post(ctx) })
 	r.Gin.GET("/organizers/:id", func(ctx *gin.Context) { c.organizer.Get(ctx) })
 
+	r.Gin.GET("/tickets", func(ctx *gin.Context) { c.ticket.GetList(ctx) })
 	r.Gin.POST("/tickets", func(ctx *gin.Context) { c.ticket.Post(ctx) })
 	r.Gin.GET("/tickets/:id", func(ctx *gin.Context) { c.ticket.Get(ctx) })
 

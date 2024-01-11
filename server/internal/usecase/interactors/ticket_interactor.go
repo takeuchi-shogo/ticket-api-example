@@ -47,6 +47,44 @@ func (t *ticketInteractor) Get(id int) (*models.TicketsResponse, *usecase.Result
 	return builtTicket, usecase.NewResultStatus(http.StatusOK, nil)
 }
 
+func (t *ticketInteractor) GetListByEventID(eventID int) (*models.TicketInteractorResponse, *usecase.ResultStatus) {
+
+	db, _ := t.db.Connect()
+
+	tickets, err := t.ticket.FindByEventID(db, eventID)
+	if err != nil {
+		return &models.TicketInteractorResponse{}, usecase.NewResultStatus(http.StatusBadRequest, err)
+	}
+
+	builtTickets := make([]*models.TicketsResponse, len(tickets))
+
+	for i, ticket := range tickets {
+		builtTicket, _ := t.build(db, ticket)
+		builtTickets[i] = builtTicket
+	}
+	return &models.TicketInteractorResponse{
+		Tickets: builtTickets,
+		Total:   len(builtTickets),
+	}, usecase.NewResultStatus(http.StatusOK, nil)
+}
+
+func (t *ticketInteractor) GetListByArtistID(artistID int) ([]*models.TicketsResponse, *usecase.ResultStatus) {
+	db, _ := t.db.Connect()
+
+	tickets, err := t.ticket.FindByArtistID(db, artistID)
+	if err != nil {
+		return []*models.TicketsResponse{}, usecase.NewResultStatus(http.StatusBadRequest, err)
+	}
+
+	builtTickets := make([]*models.TicketsResponse, len(tickets))
+
+	for i, ticket := range tickets {
+		builtTicket, _ := t.build(db, ticket)
+		builtTickets[i] = builtTicket
+	}
+	return builtTickets, usecase.NewResultStatus(http.StatusOK, nil)
+}
+
 func (t *ticketInteractor) build(db bun.IDB, ticket *models.Tickets) (*models.TicketsResponse, error) {
 
 	builtTicket := ticket.BuildForGet()

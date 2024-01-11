@@ -32,6 +32,8 @@ type EventsReponse struct {
 	Description       *string `json:"description"`
 	Note              *string `json:"note"`
 	IsPrivate         bool    `json:"is_private"`
+
+	Artists []*ArtistsResponse `json:"artists,omitempty"`
 }
 
 type EventInteractorResponse struct {

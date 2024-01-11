@@ -10,6 +10,7 @@ import (
 
 type TicketsController interface {
 	Get(ctx Context)
+	GetList(ctx Context)
 	Post(ctx Context)
 }
 
@@ -32,6 +33,31 @@ func (t *ticketsController) Get(ctx Context) {
 		return
 	}
 	ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: ticket})
+}
+
+func (t *ticketsController) GetList(ctx Context) {
+
+	eventID, _ := strconv.Atoi(ctx.Query("event_id"))
+	if 0 < eventID {
+		tickets, res := t.ticket.GetListByEventID(eventID)
+		if res.Err != nil {
+			ctx.JSON(res.StatusCode, presenters.ErrResponse{ErrorMessage: res.Err.Error()})
+			return
+		}
+		ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: tickets})
+		return
+	}
+
+	artistID, _ := strconv.Atoi(ctx.Query("artist_id"))
+	if 0 < eventID {
+		tickets, res := t.ticket.GetListByArtistID(artistID)
+		if res.Err != nil {
+			ctx.JSON(res.StatusCode, presenters.ErrResponse{ErrorMessage: res.Err.Error()})
+			return
+		}
+		ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: tickets})
+		return
+	}
 }
 
 func (t *ticketsController) Post(ctx Context) {
