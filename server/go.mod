@@ -11,6 +11,7 @@ require (
 	github.com/redis/go-redis/v9 v9.3.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.17.0
+	github.com/stripe/stripe-go/v76 v76.11.0
 	github.com/uptrace/bun v1.1.16
 	github.com/uptrace/bun/dialect/mysqldialect v1.1.16
 	github.com/uptrace/bun/extra/bundebug v1.1.16

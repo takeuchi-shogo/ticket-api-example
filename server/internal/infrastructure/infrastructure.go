@@ -8,5 +8,6 @@ var Module = fx.Options(
 		NewRedis,
 		NewControllers,
 		NewRouting,
+		NewStripe,
 	),
 )

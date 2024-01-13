@@ -18,11 +18,13 @@ type ServerConfig struct {
 	// 	Password string `mapstructure:"DB_PASS"`
 	// 	DBName   string `mapstructure:"DB_NAME"`
 	// }
-	DBHost     string `mapstructure:"DB_HOST"`
-	DBUserName string `mapstructure:"DB_USER"`
-	DBPassword string `mapstructure:"DB_PASS"`
-	DBName     string `mapstructure:"DB_NAME"`
-	Port       int    `mapstructure:"SERVER_PORT"`
+	DBHost          string `mapstructure:"DB_HOST"`
+	DBUserName      string `mapstructure:"DB_USER"`
+	DBPassword      string `mapstructure:"DB_PASS"`
+	DBName          string `mapstructure:"DB_NAME"`
+	StripePublicKey string `mapstructure:"STRIPE_PUBLIC_KEY"`
+	StripeSecretKey string `mapstructure:"STRIPE_SECRET_KEY"`
+	Port            int    `mapstructure:"SERVER_PORT"`
 }
 
 var Module = fx.Options(

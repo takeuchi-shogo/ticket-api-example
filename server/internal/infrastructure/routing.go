@@ -36,6 +36,7 @@ type Controllers struct {
 	artist        controllers.ArtistsController
 	auth          controllers.AuthController
 	buy           controllers.BuyController
+	creditCard    controllers.CreditCardsController
 	event         controllers.EventController
 	me            controllers.MeController
 	organizer     controllers.OrganizersController
@@ -50,6 +51,7 @@ func NewControllers(
 	ar controllers.ArtistsController,
 	a controllers.AuthController,
 	b controllers.BuyController,
+	c controllers.CreditCardsController,
 	e controllers.EventController,
 	me controllers.MeController,
 	o controllers.OrganizersController,
@@ -62,6 +64,7 @@ func NewControllers(
 		admin:         ad,
 		artist:        ar,
 		auth:          a,
+		creditCard:    c,
 		event:         e,
 		buy:           b,
 		me:            me,
@@ -101,6 +104,7 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 	r.Gin.POST("/logout", func(ctx *gin.Context) { c.auth.Logout(ctx) })
 
 	r.Gin.POST("/buy", func(ctx *gin.Context) { c.buy.Post(ctx) })
+
 	r.Gin.GET("/events", func(ctx *gin.Context) { c.event.GetList(ctx) })
 	r.Gin.POST("/events", func(ctx *gin.Context) { c.event.Post(ctx) })
 	r.Gin.GET("/events/:id", func(ctx *gin.Context) { c.event.Get(ctx) })
@@ -123,6 +127,9 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 
 	v1Auth := r.Gin.Use(middleware.JwtAuthMiddleware(token.NewJwtMaker(config)))
 	{
+		v1Auth.GET("/credit_cards", func(ctx *gin.Context) { c.creditCard.Get(ctx) })
+		v1Auth.POST("/credit_cards", func(ctx *gin.Context) { c.creditCard.Post(ctx) })
+
 		v1Auth.GET("/me", func(ctx *gin.Context) { c.me.GetMe(ctx) })
 		v1Auth.PATCH("/me", func(ctx *gin.Context) { c.me.Patch(ctx) })
 	}
@@ -151,6 +158,7 @@ func (r *Routing) cors(config *config.ServerConfig) {
 		"Content-Length",
 		"Accept-Encoding",
 		"Authorization",
+		"X-API-Key",
 	}
 	// ヘッダー名を羅列して、レスポンスの一部として開示するものを指定
 	// 既定のセーフリストは7つだけだから

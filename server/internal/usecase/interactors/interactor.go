@@ -7,6 +7,8 @@ var Module = fx.Options(
 		NewAdministratorInteractor,
 		NewArtistInteractor,
 		NewAuthInteractor,
+		NewBuyInteractor,
+		NewCreditCardInteractor,
 		NewOrganizerInteractor,
 		NewEventInteractor,
 		NewMeInteractor,
