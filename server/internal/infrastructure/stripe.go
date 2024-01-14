@@ -6,6 +6,7 @@ import (
 
 	stripe "github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/customer"
+	"github.com/stripe/stripe-go/v76/paymentintent"
 	"github.com/stripe/stripe-go/v76/paymentsource"
 	"github.com/stripe/stripe-go/v76/token"
 	"github.com/takeuchi-shogo/ticket-api/config"
@@ -148,4 +149,83 @@ func (s *Stripe) GetToken(t string) error {
 		return err
 	}
 	return err
+}
+
+// 支払いの作成
+func (s *Stripe) CreatePaymentIntent(amount int, customerID string) {
+	stripe.Key = s.SecretKey
+
+	params := &stripe.PaymentIntentParams{
+		Amount:   stripe.Int64(int64(amount)),
+		Customer: stripe.String(customerID),
+		Currency: stripe.String(string(stripe.CurrencyJPY)),
+		PaymentMethodTypes: []*string{
+			stripe.String("card"),
+		},
+		CaptureMethod: stripe.String(string(stripe.PaymentIntentCaptureMethodManual)),
+	}
+	result, err := paymentintent.New(params)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(result)
+}
+
+// オーソリを採用する支払い情報をStripeへ送信する(カードによって上限があるみたい)
+func (s *Stripe) AuthenticatePaymentIntent(amount int, customerID string) (string, error) {
+	stripe.Key = s.SecretKey
+
+	params := &stripe.PaymentIntentParams{
+		Amount: stripe.Int64(int64(amount)),
+		AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
+			Enabled:        stripe.Bool(true),
+			AllowRedirects: stripe.String(string(stripe.PaymentIntentAutomaticPaymentMethodsAllowRedirectsNever)),
+		},
+		Customer:      stripe.String(customerID),
+		Currency:      stripe.String(string(stripe.CurrencyJPY)),
+		PaymentMethod: stripe.String("pm_card_visa"),
+		Confirm:       stripe.Bool(true),
+		CaptureMethod: stripe.String(string(stripe.PaymentIntentCaptureMethodManual)),
+		PaymentMethodOptions: &stripe.PaymentIntentPaymentMethodOptionsParams{
+			Card: &stripe.PaymentIntentPaymentMethodOptionsCardParams{
+				// RequestExtendedAuthorization: stripe.String(string(stripe.PaymentIntentPaymentMethodOptionsCardRequestExtendedAuthorizationIfAvailable)),
+			},
+		},
+	}
+
+	params.AddExpand("latest_charge")
+
+	result, err := paymentintent.New(params)
+	if err != nil {
+		return "", err
+	}
+
+	log.Println("result", result)
+	return result.ID, nil
+}
+
+// オーソリで確保した与信を支払い確定とする
+func (s *Stripe) CapturePaymentIntent(paymentID string) {
+	stripe.Key = s.SecretKey
+
+	params := &stripe.PaymentIntentCaptureParams{}
+
+	result, err := paymentintent.Capture(paymentID, params)
+	if err != nil {
+
+	}
+	log.Println(result)
+}
+
+// 確保した与信を解放する
+func (s *Stripe) CancelPaymentIntent(paymentID string) {
+	stripe.Key = s.SecretKey
+
+	params := &stripe.PaymentIntentCancelParams{}
+
+	result, err := paymentintent.Cancel(paymentID, params)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(result)
 }

@@ -11,7 +11,7 @@ type CreditCards struct {
 
 type CreditCardsReponse struct {
 	Brand    string `json:"brand"`
-	ExpMonth string `json:"expMonth"`
-	ExpYear  string `json:"expYear"`
+	ExpMonth string `json:"exp_month"`
+	ExpYear  string `json:"exp_year"`
 	Last4    string `json:"last4"`
 }

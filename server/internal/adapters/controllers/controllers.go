@@ -7,7 +7,7 @@ var Module = fx.Options(
 		NewAdministratorsController,
 		NewArtistsController,
 		NewAuthController,
-		NewBuyController,
+		NewBuysController,
 		NewCreditCardsController,
 		NewOrganizersController,
 		NewEventsController,

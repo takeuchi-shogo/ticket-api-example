@@ -5,6 +5,6 @@ import (
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase"
 )
 
-type BuyService interface {
-	Create(userBookTicket *models.UserBookTickets) (*models.UserBookTicketsReponse, *usecase.ResultStatus)
+type UserBookTicketService interface {
+	Get(bookID string) (*models.UserBookTicketsReponse, *usecase.ResultStatus)
 }

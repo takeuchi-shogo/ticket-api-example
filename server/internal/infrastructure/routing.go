@@ -35,7 +35,7 @@ type Controllers struct {
 	admin         controllers.AdministratorsController
 	artist        controllers.ArtistsController
 	auth          controllers.AuthController
-	buy           controllers.BuyController
+	buy           controllers.BuysController
 	creditCard    controllers.CreditCardsController
 	event         controllers.EventController
 	me            controllers.MeController
@@ -50,7 +50,7 @@ func NewControllers(
 	ad controllers.AdministratorsController,
 	ar controllers.ArtistsController,
 	a controllers.AuthController,
-	b controllers.BuyController,
+	b controllers.BuysController,
 	c controllers.CreditCardsController,
 	e controllers.EventController,
 	me controllers.MeController,
@@ -103,8 +103,6 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 	r.Gin.POST("/signin", func(ctx *gin.Context) { c.auth.Signin(ctx) })
 	r.Gin.POST("/logout", func(ctx *gin.Context) { c.auth.Logout(ctx) })
 
-	r.Gin.POST("/buy", func(ctx *gin.Context) { c.buy.Post(ctx) })
-
 	r.Gin.GET("/events", func(ctx *gin.Context) { c.event.GetList(ctx) })
 	r.Gin.POST("/events", func(ctx *gin.Context) { c.event.Post(ctx) })
 	r.Gin.GET("/events/:id", func(ctx *gin.Context) { c.event.Get(ctx) })
@@ -127,6 +125,9 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 
 	v1Auth := r.Gin.Use(middleware.JwtAuthMiddleware(token.NewJwtMaker(config)))
 	{
+
+		r.Gin.POST("/buy", func(ctx *gin.Context) { c.buy.Post(ctx) })
+
 		v1Auth.GET("/credit_cards", func(ctx *gin.Context) { c.creditCard.Get(ctx) })
 		v1Auth.POST("/credit_cards", func(ctx *gin.Context) { c.creditCard.Post(ctx) })
 

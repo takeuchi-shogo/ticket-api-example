@@ -10,9 +10,12 @@ var Module = fx.Options(
 		NewEventRepository,
 		NewOrganizerRepository,
 		NewRegisterEmailRepository,
+		NewPaymentByCreditCardRepository,
 		NewTicketRepository,
 		NewTicketItemRepository,
 		NewTicketHasItemRepository,
+		NewUserBookTicketRepository,
+		NewUserHasTicketRepository,
 		NewUserRepository,
 	),
 )

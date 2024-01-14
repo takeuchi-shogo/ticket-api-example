@@ -41,6 +41,9 @@ type EventInteractorResponse struct {
 	Events []*EventsReponse `json:"events"`
 }
 
+type EventType struct {
+}
+
 func (e *Events) BuildFor() *EventsReponse {
 	return &EventsReponse{
 		ID:                e.ID,

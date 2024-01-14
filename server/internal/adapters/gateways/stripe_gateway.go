@@ -6,6 +6,7 @@ import (
 )
 
 type Stripe interface {
+	AuthenticatePaymentIntent(amount int, customerID string) (string, error)
 	GetCustomer(customerID string) (*models.StripeCustomer, error)
 	GetCreditCardByCustomerID(customerID, defaultSource string) (*models.StripeCreditCards, error)
 	CreateCreditCardAndCustomer(customer *models.StripeCustomer, token string) error
@@ -31,4 +32,8 @@ func (s *StripeGateway) GetCreditCardByCustomerID(customerID, defaultSource stri
 
 func (s *StripeGateway) CreateCreditCardAndCustomer(customer *models.StripeCustomer, token string) error {
 	return s.stripe.CreateCreditCardAndCustomer(customer, token)
+}
+
+func (s *StripeGateway) AuthenticatePaymentIntent(amount int, customerID string) (string, error) {
+	return s.stripe.AuthenticatePaymentIntent(amount, customerID)
 }
