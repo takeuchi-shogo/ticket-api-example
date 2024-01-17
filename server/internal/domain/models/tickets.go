@@ -10,7 +10,8 @@ type Tickets struct {
 	SaleType               string  `json:"sale_type"`
 	StartAt                int64   `json:"start_at"`
 	FinishAt               int64   `json:"finish_at"`
-	LotteryAt              int64   `json:"lottery_at"`
+	DrawingAt              int64   `json:"drawing_at"`
+	NumberOfWinningTickets int     `json:"number_of_winning_tickets"`
 	IsPaymentByCreditCard  bool    `json:"is_payment_by_credit_card"`
 	IsPaymentByConvenience bool    `json:"is_payment_by_convenience"`
 
@@ -28,7 +29,8 @@ type TicketsResponse struct {
 	SaleType               string  `json:"sale_type"`
 	StartAt                int64   `json:"start_at"`
 	FinishAt               int64   `json:"finish_at"`
-	LotteryAt              int64   `json:"lottery_at"`
+	DrawingAt              int64   `json:"drawing_at"`
+	NumberOfWinningTickets int     `json:"number_of_winning_tickets"`
 	IsPaymentByCreditCard  bool    `json:"is_payment_by_credit_card"`
 	IsPaymentByConvenience bool    `json:"is_payment_by_convenience"`
 
@@ -51,7 +53,8 @@ func (t *Tickets) BuildForGet() *TicketsResponse {
 		SaleType:               t.SaleType,
 		StartAt:                t.StartAt,
 		FinishAt:               t.FinishAt,
-		LotteryAt:              t.LotteryAt,
+		DrawingAt:              t.DrawingAt,
+		NumberOfWinningTickets: t.NumberOfWinningTickets,
 		IsPaymentByCreditCard:  t.IsPaymentByCreditCard,
 		IsPaymentByConvenience: t.IsPaymentByConvenience,
 	}

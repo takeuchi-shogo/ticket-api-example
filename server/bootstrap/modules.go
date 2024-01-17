@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"github.com/takeuchi-shogo/ticket-api/config"
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/controllers"
+	"github.com/takeuchi-shogo/ticket-api/internal/adapters/controllers/tasks"
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/gateways"
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/gateways/database"
 	"github.com/takeuchi-shogo/ticket-api/internal/infrastructure"
@@ -14,6 +15,7 @@ import (
 var CommonModule = fx.Options(
 	config.Module,
 	controllers.Module,
+	tasks.Module,
 	database.Module,
 	gateways.Module,
 	interactors.Module,

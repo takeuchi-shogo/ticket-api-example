@@ -9,5 +9,6 @@ type UserBookTicketUsecase interface {
 	FindByID(db bun.IDB, id int) (*models.UserBookTickets, error)
 	FindByBookID(db bun.IDB, bookID string) (*models.UserBookTickets, error)
 	FindByUserID(db bun.IDB, userID int) ([]*models.UserBookTickets, error)
+	FindByTicketID(db bun.IDB, ticketID int) ([]*models.UserBookTickets, error)
 	Create(db bun.IDB, userBookTicket *models.UserBookTickets) (*models.UserBookTickets, error)
 }

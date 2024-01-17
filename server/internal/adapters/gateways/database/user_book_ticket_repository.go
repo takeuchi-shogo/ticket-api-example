@@ -50,6 +50,18 @@ func (u *userBookTicketRepository) FindByUserID(db bun.IDB, userID int) ([]*mode
 	return userBookTickets, nil
 }
 
+func (u *userBookTicketRepository) FindByTicketID(db bun.IDB, ticketID int) ([]*models.UserBookTickets, error) {
+	userBookTickets := []*models.UserBookTickets{}
+
+	if err := db.NewSelect().
+		Model(userBookTickets).
+		Where("ticket_id = ?", ticketID).
+		Scan(context.Background()); err != nil {
+		return []*models.UserBookTickets{}, err
+	}
+	return userBookTickets, nil
+}
+
 func (u *userBookTicketRepository) Create(db bun.IDB, userBookTicket *models.UserBookTickets) (*models.UserBookTickets, error) {
 	_, err := db.NewInsert().Model(userBookTicket).Exec(context.Background())
 	return userBookTicket, err

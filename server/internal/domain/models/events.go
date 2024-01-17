@@ -27,6 +27,7 @@ type EventsReponse struct {
 	Title             string  `json:"title"`
 	PerformancePeriod string  `json:"performance_period"`
 	EventType         string  `json:"event_type"`
+	EventCategory     string  `json:"event_category"`
 	ShowTime          int64   `json:"show_time"`
 	OpeningTime       int64   `json:"opening_time"`
 	Description       *string `json:"description"`

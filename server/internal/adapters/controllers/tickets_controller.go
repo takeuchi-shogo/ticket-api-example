@@ -69,7 +69,7 @@ func (t *ticketsController) Post(ctx Context) {
 	saleType := ctx.PostForm("sale_type")
 	startAt, _ := strconv.ParseInt(ctx.PostForm("start_at"), 10, 64)
 	finishAt, _ := strconv.ParseInt(ctx.PostForm("finish_at"), 10, 64)
-	lotteryAt, _ := strconv.ParseInt(ctx.PostForm("lottery_at"), 10, 64)
+	drawingAt, _ := strconv.ParseInt(ctx.PostForm("drawing_at"), 10, 64)
 	isPaymentByCreditCard, _ := strconv.ParseBool(ctx.PostForm("is_payment_by_credit_card"))
 	isPaymentByConvenience, _ := strconv.ParseBool(ctx.PostForm("is_payment_by_convenience"))
 
@@ -81,7 +81,7 @@ func (t *ticketsController) Post(ctx Context) {
 		SaleType:               saleType,
 		StartAt:                startAt,
 		FinishAt:               finishAt,
-		LotteryAt:              lotteryAt,
+		DrawingAt:              drawingAt,
 		IsPaymentByCreditCard:  isPaymentByCreditCard,
 		IsPaymentByConvenience: isPaymentByConvenience,
 	})

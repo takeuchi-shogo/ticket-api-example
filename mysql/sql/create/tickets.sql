@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `tickets` (
 	`sale_type` varchar(255) NOT NULL,
 	`start_at` int UNSIGNED NOT NULL,
 	`finish_at` int UNSIGNED NOT NULL,
-	`lottery_at` int UNSIGNED NOT NULL,
+	`drawing_at` int UNSIGNED NOT NULL,
 	`is_payment_by_credit_card` tinyint(1) NOT NULL,
 	`is_payment_by_convenience` tinyint(1) NOT NULL,
 	`created_at` int UNSIGNED NOT NULL,
