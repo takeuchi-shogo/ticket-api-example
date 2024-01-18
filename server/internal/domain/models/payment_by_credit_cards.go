@@ -1,7 +1,7 @@
 package models
 
 type PaymentByCreditCards struct {
-	ID               int
+	ID               int `bun:",pk,autoincrement"`
 	UserBookTicketID int
 	PaymentID        string
 	IsValid          bool

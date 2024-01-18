@@ -1,7 +1,7 @@
 package models
 
 type CreditCards struct {
-	ID         int    `json:"id"`
+	ID         int    `json:"id" bun:",pk,autoincrement"`
 	UserID     int    `json:"user_id"`
 	CustomerID string `json:"customer_id"`
 

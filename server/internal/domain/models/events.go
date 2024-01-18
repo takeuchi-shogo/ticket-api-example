@@ -1,7 +1,7 @@
 package models
 
 type Events struct {
-	ID                int     `json:"id"`
+	ID                int     `json:"id" bun:",pk,autoincrement"`
 	OrganizerID       int     `json:"organizer_id"`
 	ArtistID          int     `json:"artist_id"`
 	VenueID           *int    `json:"venue_id"`

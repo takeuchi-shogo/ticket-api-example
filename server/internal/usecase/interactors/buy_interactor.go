@@ -6,6 +6,7 @@ import (
 	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase/services"
+	"github.com/takeuchi-shogo/ticket-api/pkg/random"
 	"github.com/uptrace/bun"
 )
 
@@ -57,7 +58,7 @@ func (b *buyInteractor) Create(userBookTicket *models.UserBookTickets) (*models.
 	}
 	// UserBookTicketの作成
 
-	userBookTicket.BookID = "testtesttest"
+	userBookTicket.BookID = b.randomBookID(db)
 	newUserBookTicket, err := b.userBookTicket.Create(db, userBookTicket)
 	if err != nil {
 		db.Rollback()
@@ -145,4 +146,18 @@ func (b *buyInteractor) paymentToStripeByCreditCard(db bun.IDB, amount int, user
 	}
 
 	return paymentBycreditCard, nil
+}
+
+func (b *buyInteractor) randomBookID(db bun.IDB) string {
+
+	bookID := random.RandomString(10)
+	for {
+		_, err := b.userBookTicket.FindByBookID(db, bookID)
+		if err != nil {
+			break
+		}
+		bookID = random.RandomString(10)
+	}
+
+	return bookID
 }

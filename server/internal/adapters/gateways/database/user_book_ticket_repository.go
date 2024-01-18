@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase"
@@ -63,6 +64,10 @@ func (u *userBookTicketRepository) FindByTicketID(db bun.IDB, ticketID int) ([]*
 }
 
 func (u *userBookTicketRepository) Create(db bun.IDB, userBookTicket *models.UserBookTickets) (*models.UserBookTickets, error) {
+
+	userBookTicket.CreatedAt = time.Now().Unix()
+	userBookTicket.UpdatedAt = time.Now().Unix()
+
 	_, err := db.NewInsert().Model(userBookTicket).Exec(context.Background())
 	return userBookTicket, err
 }

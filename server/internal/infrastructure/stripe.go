@@ -205,16 +205,17 @@ func (s *Stripe) AuthenticatePaymentIntent(amount int, customerID string) (strin
 }
 
 // オーソリで確保した与信を支払い確定とする
-func (s *Stripe) CapturePaymentIntent(paymentID string) {
+func (s *Stripe) CapturePaymentIntent(paymentID string) error {
 	stripe.Key = s.SecretKey
 
 	params := &stripe.PaymentIntentCaptureParams{}
 
 	result, err := paymentintent.Capture(paymentID, params)
 	if err != nil {
-
+		return err
 	}
 	log.Println(result)
+	return nil
 }
 
 // 確保した与信を解放する

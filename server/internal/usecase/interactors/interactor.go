@@ -1,8 +1,12 @@
 package interactors
 
-import "go.uber.org/fx"
+import (
+	"github.com/takeuchi-shogo/ticket-api/internal/usecase/interactors/tasks"
+	"go.uber.org/fx"
+)
 
 var Module = fx.Options(
+	tasks.Module,
 	fx.Provide(
 		NewAdministratorInteractor,
 		NewArtistInteractor,

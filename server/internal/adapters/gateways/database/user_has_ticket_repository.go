@@ -39,6 +39,9 @@ func (u *userHasTicketRepository) FindByTicketIDAndTicketStatus(db bun.IDB, tick
 }
 
 func (u *userHasTicketRepository) Create(db bun.IDB, userHasTicket *models.UserHasTickets) (*models.UserHasTickets, error) {
+	userHasTicket.CreatedAt = time.Now().Unix()
+	userHasTicket.UpdatedAt = time.Now().Unix()
+
 	_, err := db.NewInsert().Model(userHasTicket).Exec(context.Background())
 	return userHasTicket, err
 }

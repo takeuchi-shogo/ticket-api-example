@@ -6,5 +6,7 @@ import (
 )
 
 type PaymentByCreditCardUsecase interface {
+	FindByIsValid(db bun.IDB, isValid bool) ([]*models.PaymentByCreditCards, error)
 	Create(db bun.IDB, payment *models.PaymentByCreditCards) (*models.PaymentByCreditCards, error)
+	Save(db bun.IDB, payment *models.PaymentByCreditCards) (*models.PaymentByCreditCards, error)
 }

@@ -1,7 +1,7 @@
 package models
 
 type UserHasTickets struct {
-	ID               int    `json:"id" bun:",pk"`
+	ID               int    `json:"id" bun:",pk,autoincrement"`
 	UserID           int    `json:"user_id"`
 	UserBookTicketID int    `json:"user_book_ticket_id"`
 	SeatID           *int   `json:"seat_id"`
