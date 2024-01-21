@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/presenters"
 	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase/services"
@@ -83,6 +86,11 @@ func (m *meController) GetMe(ctx Context) {
 	ctx.JSON(res.StatusCode, presenters.NewResponse(foundUser))
 }
 
+type UserRequest struct {
+	DisplayName *string `json:"display_name"`
+	Email       *string `json:"email"`
+}
+
 func (m *meController) Patch(ctx Context) {
 
 	authPayload := ctx.MustGet(constants.AuthorizationPayloadKey).(*token.CustomClaims)
@@ -93,8 +101,22 @@ func (m *meController) Patch(ctx Context) {
 		ID: id,
 	}
 
+	body, _ := ctx.GetRawData()
+	u := &UserRequest{}
+
+	if err := json.Unmarshal(body, u); err != nil {
+		ctx.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	email := *u.Email
+	fmt.Println("user reqest", email)
 	if displayName, ok := ctx.GetPostForm("displayName"); ok {
 		user.DisplayName = displayName
+	}
+	if email, ok := ctx.GetPostForm("email"); ok {
+		fmt.Println("email", email)
+		user.Email = email
 	}
 
 	me, res := m.me.Save(user)

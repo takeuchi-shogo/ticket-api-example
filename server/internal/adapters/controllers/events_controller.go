@@ -41,7 +41,9 @@ func (e *eventsController) Get(ctx Context) {
 
 func (e *eventsController) GetList(ctx Context) {
 
-	events, res := e.eventService.GetList()
+	eventType := ctx.Query("event_type")
+
+	events, res := e.eventService.GetList(eventType)
 	if res.Err != nil {
 		ctx.JSON(res.StatusCode, presenters.Response{Message: res.Err.Error(), Data: nil})
 		return

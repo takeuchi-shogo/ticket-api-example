@@ -18,7 +18,7 @@ func NewUserHasTicketRepository() usecase.UserHasTicketUsecase {
 func (u *userHasTicketRepository) FindByUserBookTicketID(db bun.IDB, userBookTicketID int) ([]*models.UserHasTickets, error) {
 	userHasTickets := []*models.UserHasTickets{}
 	if err := db.NewSelect().
-		Model(userHasTickets).
+		Model(&userHasTickets).
 		Where("user_book_ticket_id = ?", userBookTicketID).
 		Scan(context.Background()); err != nil {
 		return []*models.UserHasTickets{}, err

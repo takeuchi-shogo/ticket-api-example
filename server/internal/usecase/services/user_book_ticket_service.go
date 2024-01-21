@@ -7,4 +7,5 @@ import (
 
 type UserBookTicketService interface {
 	Get(bookID string) (*models.UserBookTicketsReponse, *usecase.ResultStatus)
+	GetList(userID int, ticketType string) ([]*models.UserBookTicketsReponse, *usecase.ResultStatus)
 }

@@ -20,5 +20,6 @@ var Module = fx.Options(
 		NewTicketItemsController,
 		NewTicketHasItemsController,
 		NewUsersController,
+		NewUserBookTicketsController,
 	),
 )

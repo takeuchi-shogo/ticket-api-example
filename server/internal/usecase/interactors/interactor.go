@@ -20,5 +20,6 @@ var Module = fx.Options(
 		NewTicketItemInteractor,
 		NewTicketHasItemInteractor,
 		NewUserInteractor,
+		NewUserBookTicketInteractor,
 	),
 )

@@ -26,6 +26,10 @@ type UserBookTicketsReponse struct {
 
 	CreatedAt int64 `json:"created_at"`
 	UpdatedAt int64 `json:"updated_at"`
+
+	Event          *EventsReponse            `json:"event"`
+	Ticket         *TicketsResponse          `json:"ticket"`
+	UserHasTickets []*UserHasTicketsResponse `json:"user_has_tickets"`
 }
 
 func (u *UserBookTickets) BuildForGet() *UserBookTicketsReponse {

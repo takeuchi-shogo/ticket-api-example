@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
@@ -44,12 +45,13 @@ func (t *TicketRepository) FindByArtistID(db bun.IDB, artistID int) ([]*models.T
 		Model(&tickets).
 		ColumnExpr("tickets.*").
 		// ColumnExpr("e.id AS event, a.name AS author__name").
-		Join("JOIN events AS e ON e.id = ticket.event_id").
-		OrderExpr("ticket.id ASC").
+		Join("JOIN events AS e ON e.id = tickets.event_id").
+		OrderExpr("tickets.id ASC").
 		// Limit(1).
 		Scan(context.Background()); err != nil {
 		return []*models.Tickets{}, err
 	}
+	fmt.Println(tickets)
 	return tickets, nil
 }
 

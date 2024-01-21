@@ -59,6 +59,17 @@ func (e *eventRepository) FindByArtistID(db bun.IDB, artistID int) ([]*models.Ev
 	return events, nil
 }
 
+func (e *eventRepository) FindByEventType(db bun.IDB, eventType string) ([]*models.Events, error) {
+	events := []*models.Events{}
+
+	ctx := context.Background()
+	_ = db.NewSelect().Model(&events).Where("event_type = ?", eventType).Scan(ctx)
+	if len(events) <= 0 {
+		return []*models.Events{}, errors.New("events is not found")
+	}
+	return events, nil
+}
+
 func (e *eventRepository) Create(db bun.IDB, event *models.Events) (*models.Events, error) {
 	ctx := context.Background()
 

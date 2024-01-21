@@ -34,14 +34,19 @@ func (e *eventInteractor) Get(id int) (*models.Events, *usecase.ResultStatus) {
 	return event, usecase.NewResultStatus(200, nil)
 }
 
-func (e *eventInteractor) GetList() ([]*models.EventsReponse, *usecase.ResultStatus) {
+func (e *eventInteractor) GetList(eventType string) ([]*models.EventsReponse, *usecase.ResultStatus) {
 
 	db, _ := e.db.Connect()
 
-	events, err := e.event.Find(db)
+	events, err := e.event.FindByEventType(db, eventType)
 	if err != nil {
 		return []*models.EventsReponse{}, usecase.NewResultStatus(400, err)
 	}
+
+	// events, err := e.event.Find(db)
+	// if err != nil {
+	// 	return []*models.EventsReponse{}, usecase.NewResultStatus(400, err)
+	// }
 
 	builtEvents := []*models.EventsReponse{}
 

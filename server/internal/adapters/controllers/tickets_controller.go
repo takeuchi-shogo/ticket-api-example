@@ -49,7 +49,7 @@ func (t *ticketsController) GetList(ctx Context) {
 	}
 
 	artistID, _ := strconv.Atoi(ctx.Query("artist_id"))
-	if 0 < eventID {
+	if 0 < artistID {
 		tickets, res := t.ticket.GetListByArtistID(artistID)
 		if res.Err != nil {
 			ctx.JSON(res.StatusCode, presenters.ErrResponse{ErrorMessage: res.Err.Error()})

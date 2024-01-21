@@ -32,18 +32,19 @@ type Routing struct {
 }
 
 type Controllers struct {
-	admin         controllers.AdministratorsController
-	artist        controllers.ArtistsController
-	auth          controllers.AuthController
-	buy           controllers.BuysController
-	creditCard    controllers.CreditCardsController
-	event         controllers.EventController
-	me            controllers.MeController
-	organizer     controllers.OrganizersController
-	ticket        controllers.TicketsController
-	ticketItem    controllers.TicketItemsController
-	ticketHasItem controllers.TicketHasItemsController
-	user          controllers.UserController
+	admin          controllers.AdministratorsController
+	artist         controllers.ArtistsController
+	auth           controllers.AuthController
+	buy            controllers.BuysController
+	creditCard     controllers.CreditCardsController
+	event          controllers.EventController
+	me             controllers.MeController
+	organizer      controllers.OrganizersController
+	ticket         controllers.TicketsController
+	ticketItem     controllers.TicketItemsController
+	ticketHasItem  controllers.TicketHasItemsController
+	user           controllers.UserController
+	userBookTicket controllers.UserBookTicketsController
 }
 
 func NewControllers(
@@ -59,20 +60,22 @@ func NewControllers(
 	ti controllers.TicketItemsController,
 	thi controllers.TicketHasItemsController,
 	u controllers.UserController,
+	ubt controllers.UserBookTicketsController,
 ) Controllers {
 	return Controllers{
-		admin:         ad,
-		artist:        ar,
-		auth:          a,
-		creditCard:    c,
-		event:         e,
-		buy:           b,
-		me:            me,
-		organizer:     o,
-		ticket:        t,
-		ticketItem:    ti,
-		ticketHasItem: thi,
-		user:          u,
+		admin:          ad,
+		artist:         ar,
+		auth:           a,
+		creditCard:     c,
+		event:          e,
+		buy:            b,
+		me:             me,
+		organizer:      o,
+		ticket:         t,
+		ticketItem:     ti,
+		ticketHasItem:  thi,
+		user:           u,
+		userBookTicket: ubt,
 	}
 }
 
@@ -133,6 +136,10 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 
 		v1Auth.GET("/me", func(ctx *gin.Context) { c.me.GetMe(ctx) })
 		v1Auth.PATCH("/me", func(ctx *gin.Context) { c.me.Patch(ctx) })
+
+		v1Auth.GET("/userBookTickets", func(ctx *gin.Context) { c.userBookTicket.GetList(ctx) })
+
+		v1Auth.GET("/userBookTickets/:bookId", func(ctx *gin.Context) { c.userBookTicket.Get(ctx) })
 	}
 
 	v1Admin := r.Gin.Group("/admin")

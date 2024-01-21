@@ -10,5 +10,6 @@ type EventUsecase interface {
 	Find(db bun.IDB) ([]*models.Events, error)
 	FindByID(db bun.IDB, id int) (*models.Events, error)
 	FindByArtistID(db bun.IDB, artistID int) ([]*models.Events, error)
+	FindByEventType(db bun.IDB, eventType string) ([]*models.Events, error)
 	Create(db bun.IDB, event *models.Events) (*models.Events, error)
 }
