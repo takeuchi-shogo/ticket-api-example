@@ -102,42 +102,44 @@ func (a *authInteractor) Login(user *models.Users) (*models.MeInteractorResponse
 	if err != nil {
 		return &models.MeInteractorResponse{
 			User:  &models.UsersResponse{},
-			Token: "",
+			Token: &token.TokenPairs{},
 		}, usecase.NewResultStatus(http.StatusBadRequest, errors.New("メールアドレス、またはパスワードが違います"))
 	}
 
 	if err := password.CheckPassword(user.Password, foundUser.Password); err != nil {
 		return &models.MeInteractorResponse{
 			User:  &models.UsersResponse{},
-			Token: "",
+			Token: &token.TokenPairs{},
 		}, usecase.NewResultStatus(http.StatusUnauthorized, errors.New("メールアドレス、またはパスワードが違います"))
 	}
 
 	userID := strconv.FormatUint(foundUser.ID, 10)
-	fmt.Println(userID)
 
-	token, err := a.jwt.GenerateJWT(userID)
+	tokenPairs, err := a.jwt.GenerateJWT(userID)
 	if err != nil {
 		return &models.MeInteractorResponse{
 			User:  &models.UsersResponse{},
-			Token: "",
-		}, usecase.NewResultStatus(http.StatusBadRequest, err)
+			Token: &token.TokenPairs{},
+		}, usecase.NewResultStatus(http.StatusUnauthorized, err)
 	}
 
 	return &models.MeInteractorResponse{
 		User:  foundUser.BuildForGet(),
-		Token: token,
+		Token: tokenPairs,
 	}, usecase.NewResultStatus(http.StatusOK, nil)
 }
 
-func (a *authInteractor) Create(user *models.Users) (*models.Users, string, *usecase.ResultStatus) {
+func (a *authInteractor) Create(user *models.Users) (*models.MeInteractorResponse, *usecase.ResultStatus) {
 
 	db, _ := a.db.Transaction()
 
 	newUser, err := a.user.Create(db, user)
 	if err != nil {
 		db.Rollback()
-		return &models.Users{}, "", usecase.NewResultStatus(http.StatusUnauthorized, err)
+		return &models.MeInteractorResponse{
+			User:  &models.UsersResponse{},
+			Token: &token.TokenPairs{},
+		}, usecase.NewResultStatus(http.StatusBadRequest, err)
 	}
 
 	userID := strconv.Itoa(int(newUser.ID))
@@ -145,9 +147,15 @@ func (a *authInteractor) Create(user *models.Users) (*models.Users, string, *use
 	jwtToken, err := a.jwt.GenerateJWT(userID)
 	if err != nil {
 		db.Rollback()
-		return &models.Users{}, "", usecase.NewResultStatus(http.StatusUnauthorized, err)
+		return &models.MeInteractorResponse{
+			User:  &models.UsersResponse{},
+			Token: &token.TokenPairs{},
+		}, usecase.NewResultStatus(http.StatusBadRequest, err)
 	}
 
 	db.Commit()
-	return newUser, jwtToken, usecase.NewResultStatus(http.StatusOK, nil)
+	return &models.MeInteractorResponse{
+		User:  newUser.BuildForGet(),
+		Token: jwtToken,
+	}, usecase.NewResultStatus(http.StatusOK, nil)
 }

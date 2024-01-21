@@ -10,5 +10,5 @@ type AuthService interface {
 	VerifyCode(*models.RegisterEmails) *usecase.ResultStatus
 	Verify(userID int) (*models.Users, *usecase.ResultStatus)
 	Login(user *models.Users) (*models.MeInteractorResponse, *usecase.ResultStatus)
-	Create(*models.Users) (*models.Users, string, *usecase.ResultStatus)
+	Create(*models.Users) (*models.MeInteractorResponse, *usecase.ResultStatus)
 }

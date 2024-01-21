@@ -157,6 +157,7 @@ func (r *Routing) cors(config *config.ServerConfig) {
 	corsConfig.AllowOrigins = []string{"http://localhost:3000"}
 	// 資格情報（Cookie、認証ヘッダー、TLSクライアント証明書）の送信をOKするか
 	// 実装予定
+	corsConfig.AllowCredentials = true
 
 	// リクエスト間に使用できるHTTPヘッダーを指定
 	corsConfig.AllowHeaders = []string{

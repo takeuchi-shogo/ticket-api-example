@@ -1,5 +1,7 @@
 package models
 
+import "github.com/takeuchi-shogo/ticket-api/pkg/token"
+
 type Users struct {
 	ID          uint64 `json:"id" bun:",pk,autoincrement"`
 	DisplayName string `json:"display_name"`
@@ -20,8 +22,8 @@ type UsersResponse struct {
 }
 
 type MeInteractorResponse struct {
-	User  *UsersResponse `json:"user"`
-	Token string         `json:"token"`
+	User  *UsersResponse    `json:"user"`
+	Token *token.TokenPairs `json:"token"`
 }
 
 func (u *Users) BuildForGet() *UsersResponse {

@@ -6,7 +6,6 @@ import (
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/presenters"
 	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase/services"
-	"github.com/takeuchi-shogo/ticket-api/pkg/constants"
 )
 
 type AuthController interface {
@@ -69,9 +68,10 @@ func (a *authController) Signin(ctx Context) {
 		return
 	}
 
-	ctx.Header(constants.AuthorizationHeaderKey, foundUser.Token)
+	ctx.SetSameSite(http.SameSiteNoneMode)
+	ctx.SetCookie("_refresh_token", foundUser.Token.RefreshToken, 24*30*60*60, "/", "localhost", true, true)
 
-	ctx.JSON(res.StatusCode, presenters.NewResponse(foundUser.User))
+	ctx.JSON(res.StatusCode, presenters.NewResponse(foundUser))
 }
 
 func (a *authController) Signup(ctx Context) {
@@ -83,13 +83,15 @@ func (a *authController) Signup(ctx Context) {
 		return
 	}
 
-	user, token, res := a.authService.Create(u)
+	user, res := a.authService.Create(u)
 	if res.Err != nil {
 		ctx.JSON(res.StatusCode, presenters.ErrResponse{ErrorMessage: res.Err.Error()})
 		return
 	}
 
-	ctx.Header(constants.AuthorizationHeaderKey, token)
+	// ctx.Header(constants.AuthorizationHeaderKey, user.Token.AccessToken)
+	ctx.SetSameSite(http.SameSiteNoneMode)
+	ctx.SetCookie("_refresh_token", user.Token.RefreshToken, 24*30*60*60, "/", "localhost", true, true)
 
 	ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: user})
 }

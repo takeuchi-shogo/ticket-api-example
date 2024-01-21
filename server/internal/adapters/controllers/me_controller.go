@@ -46,7 +46,7 @@ func (m *meController) Get(ctx Context) {
 		return
 	}
 
-	ctx.Header(constants.AuthorizationHeaderKey, foundUser.Token)
+	ctx.Header(constants.AuthorizationHeaderKey, foundUser.Token.AccessToken)
 
 	ctx.JSON(res.StatusCode, presenters.NewResponse(foundUser.User))
 }
@@ -66,7 +66,7 @@ func (m *meController) Post(ctx Context) {
 		return
 	}
 
-	ctx.Header(constants.AuthorizationHeaderKey, newUser.Token)
+	ctx.Header(constants.AuthorizationHeaderKey, newUser.Token.AccessToken)
 
 	ctx.JSON(res.StatusCode, presenters.NewResponse(newUser.User))
 }
