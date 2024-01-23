@@ -17,5 +17,6 @@ var Module = fx.Options(
 		NewUserBookTicketRepository,
 		NewUserHasTicketRepository,
 		NewUserRepository,
+		NewUserMailLogRepository,
 	),
 )

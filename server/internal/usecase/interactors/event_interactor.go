@@ -38,19 +38,27 @@ func (e *eventInteractor) GetList(eventType string) ([]*models.EventsReponse, *u
 
 	db, _ := e.db.Connect()
 
-	events, err := e.event.FindByEventType(db, eventType)
-	if err != nil {
-		return []*models.EventsReponse{}, usecase.NewResultStatus(400, err)
+	foundEvents := []*models.Events{}
+
+	if eventType != "" {
+		events, err := e.event.FindByEventType(db, eventType)
+		if err != nil {
+			return []*models.EventsReponse{}, usecase.NewResultStatus(400, err)
+		}
+		foundEvents = events
 	}
 
-	// events, err := e.event.Find(db)
-	// if err != nil {
-	// 	return []*models.EventsReponse{}, usecase.NewResultStatus(400, err)
-	// }
+	if eventType == "" {
+		events, err := e.event.Find(db)
+		if err != nil {
+			return []*models.EventsReponse{}, usecase.NewResultStatus(400, err)
+		}
+		foundEvents = events
+	}
 
 	builtEvents := []*models.EventsReponse{}
 
-	for _, event := range events {
+	for _, event := range foundEvents {
 		builtEvents = append(builtEvents, event.BuildFor())
 	}
 	return builtEvents, usecase.NewResultStatus(200, nil)

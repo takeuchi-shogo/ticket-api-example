@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/presenters"
@@ -10,6 +11,7 @@ import (
 
 type AuthController interface {
 	RegisterEmail(ctx Context)
+	GetRegisterEmail(ctx Context)
 	VerifyCode(ctx Context)
 	Signup(ctx Context)
 	Signin(ctx Context)
@@ -33,14 +35,28 @@ func (a *authController) RegisterEmail(ctx Context) {
 	res := a.authService.RegisterEmail(email)
 	if res.Err != nil {
 		ctx.JSON(res.StatusCode, presenters.ErrResponse{ErrorMessage: res.Err.Error()})
+		return
 	}
 	ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: nil})
 }
 
+func (a *authController) GetRegisterEmail(ctx Context) {
+
+	token := ctx.Query("token")
+
+	registerEmail, res := a.authService.GetRegisterEmail(token)
+	if res.Err != nil {
+		ctx.JSON(res.StatusCode, presenters.ErrResponse{ErrorMessage: res.Err.Error()})
+		return
+	}
+	ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: registerEmail})
+}
+
 func (a *authController) VerifyCode(ctx Context) {
 
-	token := ctx.PostForm("token")
-	pinCode := ctx.PostForm("pin_code")
+	token := ctx.Query("token")
+	pinCode := ctx.Query("pin_code")
+	fmt.Println(token, pinCode)
 
 	res := a.authService.VerifyCode(&models.RegisterEmails{
 		Token:   token,
@@ -48,6 +64,7 @@ func (a *authController) VerifyCode(ctx Context) {
 	})
 	if res.Err != nil {
 		ctx.JSON(res.StatusCode, presenters.ErrResponse{ErrorMessage: res.Err.Error()})
+		return
 	}
 	ctx.JSON(res.StatusCode, presenters.Response{Message: "success", Data: nil})
 }
@@ -76,14 +93,31 @@ func (a *authController) Signin(ctx Context) {
 
 func (a *authController) Signup(ctx Context) {
 
-	u := &models.Users{}
+	firstName := ctx.PostForm("first_name")
+	lastName := ctx.PostForm("last_name")
+	displayName := ctx.PostForm("display_name")
+	email := ctx.PostForm("email")
+	tel := ctx.PostForm("tel")
+	password := ctx.PostForm("password")
+	postCode := ctx.PostForm("post_code")
+	prefecture := ctx.PostForm("prefecture")
+	city := ctx.PostForm("city")
 
-	if err := ctx.BindJSON(u); err != nil {
-		ctx.JSON(http.StatusBadRequest, presenters.ErrResponse{ErrorMessage: err.Error()})
-		return
+	token := ctx.PostForm("token")
+
+	u := &models.Users{
+		FirstName:   firstName,
+		LastName:    lastName,
+		DisplayName: &displayName,
+		Email:       email,
+		Tel:         tel,
+		Password:    password,
+		PostCode:    postCode,
+		Prefecture:  prefecture,
+		City:        city,
 	}
 
-	user, res := a.authService.Create(u)
+	user, res := a.authService.Create(u, token)
 	if res.Err != nil {
 		ctx.JSON(res.StatusCode, presenters.ErrResponse{ErrorMessage: res.Err.Error()})
 		return

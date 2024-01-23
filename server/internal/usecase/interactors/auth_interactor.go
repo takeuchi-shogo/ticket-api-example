@@ -20,6 +20,7 @@ type authInteractor struct {
 	jwt           token.JwtMakerInterface
 	registerEmail usecase.RegisterEmailUsecase
 	user          usecase.UserUsecase
+	userMailLog   usecase.UserMailLogUsecase
 }
 
 func NewAuthInteractor(
@@ -27,39 +28,66 @@ func NewAuthInteractor(
 	jwt token.JwtMakerInterface,
 	registerEmail usecase.RegisterEmailUsecase,
 	user usecase.UserUsecase,
+	userMailLog usecase.UserMailLogUsecase,
 ) services.AuthService {
 	return &authInteractor{
 		db:            db,
 		jwt:           jwt,
 		registerEmail: registerEmail,
 		user:          user,
+		userMailLog:   userMailLog,
 	}
 }
 
 func (a *authInteractor) RegisterEmail(email string) *usecase.ResultStatus {
 
-	// db, err := a.DB.Connect()
-	// if err != nil {
-	// 	return usecase.NewResultStatus(http.StatusInternalServerError, err)
-	// }
+	db, err := a.db.Connect()
+	if err != nil {
+		return usecase.NewResultStatus(http.StatusInternalServerError, err)
+	}
+	if email == "" {
+		return usecase.NewResultStatus(http.StatusBadRequest, errors.New("メールアドレスが入力されていません"))
+	}
 
 	registerEmail := &models.RegisterEmails{
 		Email:   email,
-		Token:   random.RandomString(200),
+		Token:   random.RandomString(30),
 		PinCode: random.RandomPinCode(),
 	}
 
-	// fmt.Println(registerEmail)
-	fmt.Printf("%+v\n", registerEmail)
+	for {
+		_, err := a.registerEmail.FindByToken(db, registerEmail.Token)
+		if err != nil {
+			break
+		}
+		registerEmail.Token = random.RandomString(30)
+	}
 
-	// newRegisterEmail, err := a.registerEmail.Create(db, registerEmail)
-	// if err != nil {
-	// 	return usecase.NewResultStatus(http.StatusBadRequest, err)
-	// }
+	for {
+		_, err := a.registerEmail.FindByPinCode(db, registerEmail.PinCode)
+		if err != nil {
+			break
+		}
+		registerEmail.Token = random.RandomString(30)
+	}
 
-	// fmt.Printf("%+v\n", newRegisterEmail)
+	_, err = a.registerEmail.Create(db, registerEmail)
+	if err != nil {
+		return usecase.NewResultStatus(http.StatusBadRequest, err)
+	}
 
-	return usecase.NewResultStatus(http.StatusOK, nil)
+	return usecase.NewResultStatus(http.StatusNoContent, nil)
+}
+
+func (a *authInteractor) GetRegisterEmail(token string) (*models.RegisterEmailsResponse, *usecase.ResultStatus) {
+	db, _ := a.db.Connect()
+
+	registerEmail, err := a.registerEmail.FindByToken(db, token)
+	if err != nil {
+		return &models.RegisterEmailsResponse{}, usecase.NewResultStatus(http.StatusBadRequest, err)
+	}
+
+	return registerEmail.BuildForGet(), usecase.NewResultStatus(http.StatusOK, nil)
 }
 
 func (a *authInteractor) VerifyCode(registerEmail *models.RegisterEmails) *usecase.ResultStatus {
@@ -71,13 +99,13 @@ func (a *authInteractor) VerifyCode(registerEmail *models.RegisterEmails) *useca
 
 	foundRegisterEmail, err := a.registerEmail.FindByPinCode(db, registerEmail.PinCode)
 	if err != nil {
-		return usecase.NewResultStatus(http.StatusBadRequest, err)
+		return usecase.NewResultStatus(http.StatusBadRequest, errors.New("入力されたコードに誤りがあります"))
 	}
 
 	if foundRegisterEmail.Token != registerEmail.Token {
 		return usecase.NewResultStatus(http.StatusBadRequest, errors.New("無効なトークンです"))
 	}
-	if foundRegisterEmail.IsValid {
+	if !foundRegisterEmail.IsValid {
 		return usecase.NewResultStatus(http.StatusBadRequest, errors.New("無効な操作です"))
 	}
 	if foundRegisterEmail.ExpireAt <= time.Now().Unix() {
@@ -129,9 +157,16 @@ func (a *authInteractor) Login(user *models.Users) (*models.MeInteractorResponse
 	}, usecase.NewResultStatus(http.StatusOK, nil)
 }
 
-func (a *authInteractor) Create(user *models.Users) (*models.MeInteractorResponse, *usecase.ResultStatus) {
+func (a *authInteractor) Create(user *models.Users, verifyToken string) (*models.MeInteractorResponse, *usecase.ResultStatus) {
 
 	db, _ := a.db.Transaction()
+
+	if _, err := a.registerEmail.FindByToken(db, verifyToken); err != nil {
+		return &models.MeInteractorResponse{
+			User:  &models.UsersResponse{},
+			Token: &token.TokenPairs{},
+		}, usecase.NewResultStatus(http.StatusBadRequest, err)
+	}
 
 	newUser, err := a.user.Create(db, user)
 	if err != nil {

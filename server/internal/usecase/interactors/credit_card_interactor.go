@@ -64,7 +64,7 @@ func (c creditCardInteractor) Create(userID int, token string) (*models.CreditCa
 	}
 
 	customer := &models.StripeCustomer{
-		Name:   user.DisplayName,
+		Name:   *user.DisplayName,
 		Email:  user.Email,
 		Source: token,
 	}

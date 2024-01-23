@@ -1,11 +1,11 @@
-CREATE TABLE IF NOT EXISTS `register_emails` (
+CREATE TABLE IF NOT EXISTS `user_mail_logs` (
 	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`email` varchar(50) NOT NULL,
-	`token` varchar(50) NOT NULL,
-	`pin_code` varchar(10) NOT NULL,
-	`is_valid` tinyint(1) NOT NULL,
+	`email` varchar(50) NULL,
+	`user_id` INT(10) NULL,
+	`user_book_ticket_id` INT(10) NULL,
+	`mail_type` varchar(50) NOT NULL,
 	`is_send` tinyint(1) NOT NULL,
-	`expire_at` int UNSIGNED NOT NULL,
+	`error_message` text NULL,
 	`created_at` int UNSIGNED NOT NULL,
 	`updated_at` int UNSIGNED NOT NULL,
 	PRIMARY KEY (`id`)

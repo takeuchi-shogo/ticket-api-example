@@ -42,6 +42,11 @@ func (u *UserRepository) Create(db bun.IDB, user *models.Users) (*models.Users, 
 
 	user.CreatedAt = time.Now().Unix()
 	user.UpdatedAt = time.Now().Unix()
+	user.DeletedAt = nil
+
+	if err := user.Validate(); err != nil {
+		return &models.Users{}, err
+	}
 
 	_, err := db.NewInsert().Model(user).Exec(ctx)
 	if err != nil {

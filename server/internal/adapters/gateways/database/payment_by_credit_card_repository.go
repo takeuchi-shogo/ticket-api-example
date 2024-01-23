@@ -23,6 +23,8 @@ func (p *paymentByCreditCardRepository) FindByIsValid(db bun.IDB, isValid bool) 
 }
 
 func (p *paymentByCreditCardRepository) Create(db bun.IDB, payment *models.PaymentByCreditCards) (*models.PaymentByCreditCards, error) {
+
+	payment.IsValid = true // 決済が完了するまでは有効
 	payment.CreatedAt = time.Now().Unix()
 	payment.UpdatedAt = time.Now().Unix()
 

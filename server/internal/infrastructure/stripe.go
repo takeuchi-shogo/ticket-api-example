@@ -200,7 +200,6 @@ func (s *Stripe) AuthenticatePaymentIntent(amount int, customerID string) (strin
 		return "", err
 	}
 
-	log.Println("result", result)
 	return result.ID, nil
 }
 

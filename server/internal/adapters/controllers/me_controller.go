@@ -112,7 +112,7 @@ func (m *meController) Patch(ctx Context) {
 	email := *u.Email
 	fmt.Println("user reqest", email)
 	if displayName, ok := ctx.GetPostForm("displayName"); ok {
-		user.DisplayName = displayName
+		user.DisplayName = &displayName
 	}
 	if email, ok := ctx.GetPostForm("email"); ok {
 		fmt.Println("email", email)

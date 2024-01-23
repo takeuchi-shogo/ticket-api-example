@@ -2,6 +2,7 @@ package interactors
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase"
@@ -57,7 +58,6 @@ func (b *buyInteractor) Create(userBookTicket *models.UserBookTickets) (*models.
 		return &models.UserBookTicketsReponse{}, usecase.NewResultStatus(http.StatusBadRequest, err)
 	}
 	// UserBookTicketの作成
-
 	userBookTicket.BookID = b.randomBookID(db)
 	newUserBookTicket, err := b.userBookTicket.Create(db, userBookTicket)
 	if err != nil {
@@ -125,11 +125,6 @@ func (b *buyInteractor) paymentToStripeByCreditCard(db bun.IDB, amount int, user
 	if err != nil {
 		return &models.PaymentByCreditCards{}, err
 	}
-	// カスタマー情報の取得
-	// customer, err := b.stripe.GetCustomer(creditCard.CustomerID)
-	// if err != nil {
-	// 	return &models.PaymentByCreditCards{}, err
-	// }
 
 	// オーソリ（与信の確保）
 	paymentID, err := b.stripe.AuthenticatePaymentIntent(amount, creditCard.CustomerID)
@@ -140,6 +135,7 @@ func (b *buyInteractor) paymentToStripeByCreditCard(db bun.IDB, amount int, user
 	paymentBycreditCard, err := b.paymentByCreditCard.Create(db, &models.PaymentByCreditCards{
 		UserBookTicketID: userBookTicketID,
 		PaymentID:        paymentID,
+		ExpireAt:         time.Now().AddDate(0, 0, 30).Unix(),
 	})
 	if err != nil {
 		return &models.PaymentByCreditCards{}, err

@@ -101,7 +101,8 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 	r.Gin.GET("/artists/:id", func(ctx *gin.Context) { c.artist.Get(ctx) })
 
 	r.Gin.POST("/registerEmails", func(ctx *gin.Context) { c.auth.RegisterEmail(ctx) })
-	r.Gin.POST("/verifyCode", func(ctx *gin.Context) { c.auth.VerifyCode(ctx) })
+	r.Gin.GET("/registerEmails", func(ctx *gin.Context) { c.auth.GetRegisterEmail(ctx) })
+	r.Gin.GET("/verifyCode", func(ctx *gin.Context) { c.auth.VerifyCode(ctx) })
 	r.Gin.POST("/signup", func(ctx *gin.Context) { c.auth.Signup(ctx) })
 	r.Gin.POST("/signin", func(ctx *gin.Context) { c.auth.Signin(ctx) })
 	r.Gin.POST("/logout", func(ctx *gin.Context) { c.auth.Logout(ctx) })
@@ -129,7 +130,7 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 	v1Auth := r.Gin.Use(middleware.JwtAuthMiddleware(token.NewJwtMaker(config)))
 	{
 
-		r.Gin.POST("/buy", func(ctx *gin.Context) { c.buy.Post(ctx) })
+		r.Gin.POST("/buys", func(ctx *gin.Context) { c.buy.Post(ctx) })
 
 		v1Auth.GET("/credit_cards", func(ctx *gin.Context) { c.creditCard.Get(ctx) })
 		v1Auth.POST("/credit_cards", func(ctx *gin.Context) { c.creditCard.Post(ctx) })
