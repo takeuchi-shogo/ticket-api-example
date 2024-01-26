@@ -5,7 +5,7 @@ type TicketHasItems struct {
 	EventID      int     `json:"event_id"`
 	TicketID     int     `json:"ticket_id"`
 	TicketItemID int     `json:"ticket_item_id"`
-	Amount       int64   `json:"amount"`
+	Amount       float64 `json:"amount"`
 	Remarks      *string `json:"remarks"`
 
 	CreatedAt int64 `json:"created_at"`
@@ -17,6 +17,17 @@ type TicketHasItemsResponse struct {
 	EventID      int     `json:"event_id"`
 	TicketID     int     `json:"ticket_id"`
 	TicketItemID int     `json:"ticket_item_id"`
-	Amount       int64   `json:"amount"`
+	Amount       float64 `json:"amount"`
 	Remarks      *string `json:"remarks"`
+}
+
+func (t *TicketHasItems) BuildForGet() *TicketHasItemsResponse {
+	return &TicketHasItemsResponse{
+		ID:           t.ID,
+		EventID:      t.EventID,
+		TicketID:     t.TicketID,
+		TicketItemID: t.TicketItemID,
+		Amount:       t.Amount,
+		Remarks:      t.Remarks,
+	}
 }

@@ -2,7 +2,6 @@ package token
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -14,8 +13,12 @@ import (
 	"github.com/takeuchi-shogo/ticket-api/pkg/uuid"
 )
 
+var Module = fx.Options(
+	fx.Provide(NewJwtMaker),
+)
+
 type JwtMakerInterface interface {
-	GenerateJWT(userID string) (string, error)
+	GenerateJWT(userID string) (*TokenPairs, error)
 	VerifyJwtToken(token string) (*CustomClaims, error)
 	NewNumericDate(hour int) *jwt.NumericDate
 }
@@ -27,13 +30,16 @@ type JwtMaker struct {
 	PrivateKey      []byte
 }
 
-var Module = fx.Options(
-	fx.Provide(NewJwtMaker),
-)
-
 type CustomClaims struct {
 	UserID string `json:"uid"`
 	*jwt.RegisteredClaims
+}
+
+type TokenPairs struct {
+	AccessToken          string `json:"access_token"`
+	RefreshToken         string `json:"refresh_token"`
+	TokenExpireAt        int64  `json:"token_expire_at"`
+	RefreshTokenExpireAt int64  `json:"refresh_token_expire_at"`
 }
 
 func NewJwtMaker(c config.ServerConfig) JwtMakerInterface {
@@ -44,7 +50,7 @@ func NewJwtMaker(c config.ServerConfig) JwtMakerInterface {
 	}
 }
 
-func (jm *JwtMaker) GenerateJWT(userID string) (string, error) {
+func (jm *JwtMaker) GenerateJWT(userID string) (*TokenPairs, error) {
 
 	claims := &CustomClaims{
 		userID,
@@ -52,25 +58,57 @@ func (jm *JwtMaker) GenerateJWT(userID string) (string, error) {
 			ExpiresAt: jm.NewNumericDate(24),
 			IssuedAt:  jm.NewNumericDate(0),
 			NotBefore: jm.NewNumericDate(0),
-			Issuer:    "test test",
+			Issuer:    "admin",
 			Subject:   "tacketmaster",
 			ID:        uuid.NewRandom(),
 			Audience:  []string{jm.ApplicationName},
 		},
 	}
 
+	claims.UserID = userID
+
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
 	signKey, err := jwt.ParseRSAPrivateKeyFromPEM(jm.PrivateKey)
 	if err != nil {
-		return "", err
+		return &TokenPairs{}, err
 	}
 
 	tokenString, err := token.SignedString(signKey)
 	if err != nil {
-		return "", err
+		return &TokenPairs{}, err
 	}
-	return tokenString, nil
+
+	refreshClaims := &CustomClaims{
+		userID,
+		&jwt.RegisteredClaims{
+			ExpiresAt: jm.NewNumericDate(24 * 30),
+			IssuedAt:  jm.NewNumericDate(0),
+			NotBefore: jm.NewNumericDate(0),
+			Issuer:    "admin",
+			Subject:   "tacketmaster",
+			ID:        uuid.NewRandom(),
+			Audience:  []string{jm.ApplicationName},
+		},
+	}
+
+	refreshClaims.UserID = userID
+
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodRS256, refreshClaims)
+
+	refreshTokenString, err := refreshToken.SignedString(signKey)
+	if err != nil {
+		return &TokenPairs{}, err
+	}
+
+	pairs := &TokenPairs{
+		AccessToken:          tokenString,
+		RefreshToken:         refreshTokenString,
+		TokenExpireAt:        time.Now().Add(24 * time.Hour).Unix(),
+		RefreshTokenExpireAt: time.Now().Add(24 * 30 * time.Hour).Unix(),
+	}
+
+	return pairs, nil
 }
 
 func (jm *JwtMaker) VerifyJwtToken(token string) (*CustomClaims, error) {
@@ -88,8 +126,6 @@ func extractBearerToken(header string) (string, error) {
 	if header == "" {
 		return "", errors.New("bad header value given")
 	}
-
-	fmt.Println(header)
 
 	jwtToken := strings.Split(header, ".")
 	if len(jwtToken) != 3 {

@@ -42,7 +42,7 @@ func NewApp() App {
 	return cmd
 }
 
-func NewServer(lc fx.Lifecycle, r *infrastructure.Routing) {
+func NewServer(lc fx.Lifecycle, r *infrastructure.Routing, c *infrastructure.Cron) {
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
@@ -53,6 +53,7 @@ func NewServer(lc fx.Lifecycle, r *infrastructure.Routing) {
 			// }
 			// go srv.Serve(ln) // process an incoming request in a go routine
 			go r.Run()
+			go c.Run()
 			fmt.Println("[My Demo]Succeeded to start HTTP Server at")
 			return nil
 

@@ -32,32 +32,50 @@ type Routing struct {
 }
 
 type Controllers struct {
-	admin     controllers.AdministratorsController
-	auth      controllers.AuthController
-	event     controllers.EventController
-	me        controllers.MeController
-	organizer controllers.OrganizersController
-	ticket    controllers.TicketsController
-	user      controllers.UserController
+	admin          controllers.AdministratorsController
+	artist         controllers.ArtistsController
+	auth           controllers.AuthController
+	buy            controllers.BuysController
+	creditCard     controllers.CreditCardsController
+	event          controllers.EventController
+	me             controllers.MeController
+	organizer      controllers.OrganizersController
+	ticket         controllers.TicketsController
+	ticketItem     controllers.TicketItemsController
+	ticketHasItem  controllers.TicketHasItemsController
+	user           controllers.UserController
+	userBookTicket controllers.UserBookTicketsController
 }
 
 func NewControllers(
 	ad controllers.AdministratorsController,
+	ar controllers.ArtistsController,
 	a controllers.AuthController,
+	b controllers.BuysController,
+	c controllers.CreditCardsController,
 	e controllers.EventController,
 	me controllers.MeController,
 	o controllers.OrganizersController,
 	t controllers.TicketsController,
+	ti controllers.TicketItemsController,
+	thi controllers.TicketHasItemsController,
 	u controllers.UserController,
+	ubt controllers.UserBookTicketsController,
 ) Controllers {
 	return Controllers{
-		admin:     ad,
-		auth:      a,
-		event:     e,
-		me:        me,
-		organizer: o,
-		ticket:    t,
-		user:      u,
+		admin:          ad,
+		artist:         ar,
+		auth:           a,
+		creditCard:     c,
+		event:          e,
+		buy:            b,
+		me:             me,
+		organizer:      o,
+		ticket:         t,
+		ticketItem:     ti,
+		ticketHasItem:  thi,
+		user:           u,
+		userBookTicket: ubt,
 	}
 }
 
@@ -75,9 +93,16 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 
 	r.cors(&config)
 
+	r.Gin.Use(r.auth())
+
 	// ハンドラーをGinに登録する
+	r.Gin.GET("/artists", func(ctx *gin.Context) { c.artist.GetList(ctx) })
+	r.Gin.POST("/artists", func(ctx *gin.Context) { c.artist.Post(ctx) })
+	r.Gin.GET("/artists/:id", func(ctx *gin.Context) { c.artist.Get(ctx) })
+
 	r.Gin.POST("/registerEmails", func(ctx *gin.Context) { c.auth.RegisterEmail(ctx) })
-	r.Gin.POST("/verifyCode", func(ctx *gin.Context) { c.auth.VerifyCode(ctx) })
+	r.Gin.GET("/registerEmails", func(ctx *gin.Context) { c.auth.GetRegisterEmail(ctx) })
+	r.Gin.GET("/verifyCode", func(ctx *gin.Context) { c.auth.VerifyCode(ctx) })
 	r.Gin.POST("/signup", func(ctx *gin.Context) { c.auth.Signup(ctx) })
 	r.Gin.POST("/signin", func(ctx *gin.Context) { c.auth.Signin(ctx) })
 	r.Gin.POST("/logout", func(ctx *gin.Context) { c.auth.Logout(ctx) })
@@ -85,20 +110,37 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 	r.Gin.GET("/events", func(ctx *gin.Context) { c.event.GetList(ctx) })
 	r.Gin.POST("/events", func(ctx *gin.Context) { c.event.Post(ctx) })
 	r.Gin.GET("/events/:id", func(ctx *gin.Context) { c.event.Get(ctx) })
+	r.Gin.GET("/events/artists/:artistID", func(ctx *gin.Context) { c.event.GetListByArtistID(ctx) })
 
-	r.Gin.POST("/login", func(ctx *gin.Context) { c.me.Get(ctx) })
 	r.Gin.POST("/me", func(ctx *gin.Context) { c.me.Post(ctx) })
 
 	r.Gin.POST("/organizers", func(ctx *gin.Context) { c.organizer.Post(ctx) })
 	r.Gin.GET("/organizers/:id", func(ctx *gin.Context) { c.organizer.Get(ctx) })
 
+	r.Gin.GET("/tickets", func(ctx *gin.Context) { c.ticket.GetList(ctx) })
+	r.Gin.POST("/tickets", func(ctx *gin.Context) { c.ticket.Post(ctx) })
 	r.Gin.GET("/tickets/:id", func(ctx *gin.Context) { c.ticket.Get(ctx) })
+
+	r.Gin.POST("/ticketItems", func(ctx *gin.Context) { c.ticketItem.Post(ctx) })
+
+	r.Gin.POST("/ticketHasItems", func(ctx *gin.Context) { c.ticketHasItem.Post(ctx) })
 
 	r.Gin.GET("/users/:id", func(ctx *gin.Context) { c.user.Get(ctx) })
 
 	v1Auth := r.Gin.Use(middleware.JwtAuthMiddleware(token.NewJwtMaker(config)))
 	{
+
+		r.Gin.POST("/buys", func(ctx *gin.Context) { c.buy.Post(ctx) })
+
+		v1Auth.GET("/credit_cards", func(ctx *gin.Context) { c.creditCard.Get(ctx) })
+		v1Auth.POST("/credit_cards", func(ctx *gin.Context) { c.creditCard.Post(ctx) })
+
 		v1Auth.GET("/me", func(ctx *gin.Context) { c.me.GetMe(ctx) })
+		v1Auth.PATCH("/me", func(ctx *gin.Context) { c.me.Patch(ctx) })
+
+		v1Auth.GET("/userBookTickets", func(ctx *gin.Context) { c.userBookTicket.GetList(ctx) })
+
+		v1Auth.GET("/userBookTickets/:bookId", func(ctx *gin.Context) { c.userBookTicket.Get(ctx) })
 	}
 
 	v1Admin := r.Gin.Group("/admin")
@@ -112,8 +154,37 @@ func NewRouting(config config.ServerConfig, c Controllers) *Routing {
 // CORS 対応
 func (r *Routing) cors(config *config.ServerConfig) {
 	corsConfig := cors.DefaultConfig()
+	// リクエストの送信元の指定
 	corsConfig.AllowOrigins = []string{"http://localhost:3000"}
+	// 資格情報（Cookie、認証ヘッダー、TLSクライアント証明書）の送信をOKするか
+	// 実装予定
+	corsConfig.AllowCredentials = true
+
+	// リクエスト間に使用できるHTTPヘッダーを指定
+	corsConfig.AllowHeaders = []string{
+		"Access-Control-Allow-Credentials",
+		"Access-Control-Allow-Headers",
+		"Content-Type",
+		"Content-Length",
+		"Accept-Encoding",
+		"Authorization",
+		"X-API-Key",
+	}
+	// ヘッダー名を羅列して、レスポンスの一部として開示するものを指定
+	// 既定のセーフリストは7つだけだから
+	corsConfig.ExposeHeaders = append(corsConfig.ExposeHeaders, "Authorization")
 	r.Gin.Use(cors.New(corsConfig))
+}
+
+func (r *Routing) auth() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if ctx.GetHeader("X-API-KEY") != "tacketmaster-api-key" {
+			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+				"message": "API Key is invalid",
+			})
+			return
+		}
+	}
 }
 
 func (r *Routing) Run() {

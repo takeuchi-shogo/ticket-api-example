@@ -42,28 +42,28 @@ func (m *meInteractor) Get(user *models.Users) (*models.MeInteractorResponse, *u
 	if err != nil {
 		return &models.MeInteractorResponse{
 			User:  &models.UsersResponse{},
-			Token: "",
+			Token: &token.TokenPairs{},
 		}, usecase.NewResultStatus(http.StatusBadRequest, err)
 	}
 
 	if err := password.CheckPassword(user.Password, foundUser.Password); err != nil {
 		return &models.MeInteractorResponse{
 			User:  &models.UsersResponse{},
-			Token: "",
+			Token: &token.TokenPairs{},
 		}, usecase.NewResultStatus(http.StatusUnauthorized, err)
 	}
 
-	token, err := m.generateJWT(int(user.ID))
+	tokenPairs, err := m.generateJWT(int(user.ID))
 	if err != nil {
 		return &models.MeInteractorResponse{
 			User:  &models.UsersResponse{},
-			Token: "",
+			Token: &token.TokenPairs{},
 		}, usecase.NewResultStatus(http.StatusBadRequest, err)
 	}
 
 	return &models.MeInteractorResponse{
 		User:  foundUser.BuildForGet(),
-		Token: token,
+		Token: tokenPairs,
 	}, usecase.NewResultStatus(http.StatusOK, nil)
 }
 
@@ -75,7 +75,7 @@ func (m *meInteractor) Create(user *models.Users) (*models.MeInteractorResponse,
 	if err != nil {
 		return &models.MeInteractorResponse{
 			User:  &models.UsersResponse{},
-			Token: "",
+			Token: &token.TokenPairs{},
 		}, usecase.NewResultStatus(http.StatusBadRequest, err)
 	}
 
@@ -85,30 +85,61 @@ func (m *meInteractor) Create(user *models.Users) (*models.MeInteractorResponse,
 	if err != nil {
 		return &models.MeInteractorResponse{
 			User:  &models.UsersResponse{},
-			Token: "",
+			Token: &token.TokenPairs{},
 		}, usecase.NewResultStatus(http.StatusBadRequest, err)
 	}
 
-	token, err := m.generateJWT(int(newUser.ID))
+	tokenPairs, err := m.generateJWT(int(newUser.ID))
 	if err != nil {
 		return &models.MeInteractorResponse{
 			User:  &models.UsersResponse{},
-			Token: "",
+			Token: &token.TokenPairs{},
 		}, usecase.NewResultStatus(http.StatusBadRequest, err)
 	}
 
 	return &models.MeInteractorResponse{
 		User:  newUser.BuildForGet(),
-		Token: token,
+		Token: tokenPairs,
 	}, usecase.NewResultStatus(http.StatusOK, nil)
 }
 
-func (m *meInteractor) generateJWT(userID int) (string, error) {
+func (m *meInteractor) GetMe(userID int) (*models.UsersResponse, *usecase.ResultStatus) {
+
+	db, _ := m.db.Connect()
+
+	foundUser, err := m.user.FindByID(db, userID)
+	if err != nil {
+		return &models.UsersResponse{}, usecase.NewResultStatus(http.StatusBadRequest, err)
+	}
+
+	return foundUser.BuildForGet(), usecase.NewResultStatus(http.StatusOK, nil)
+}
+
+func (m *meInteractor) generateJWT(userID int) (*token.TokenPairs, error) {
 	id := int(userID)
 
-	token, err := m.jwt.GenerateJWT(strconv.Itoa(id))
+	tokenPairs, err := m.jwt.GenerateJWT(strconv.Itoa(id))
 	if err != nil {
-		return "", err
+		return &token.TokenPairs{}, err
 	}
-	return token, nil
+	return tokenPairs, nil
+}
+
+func (m *meInteractor) Save(user *models.Users) (*models.UsersResponse, *usecase.ResultStatus) {
+
+	db, _ := m.db.Connect()
+
+	foundUser, err := m.user.FindByID(db, int(user.ID))
+	if err != nil {
+		return &models.UsersResponse{}, usecase.NewResultStatus(http.StatusBadRequest, err)
+	}
+
+	foundUser.DisplayName = user.DisplayName
+
+	updatedUser, err := m.user.Save(db, foundUser)
+	if err != nil {
+		return &models.UsersResponse{}, usecase.NewResultStatus(http.StatusBadRequest, err)
+	}
+
+	return updatedUser.BuildForGet(), usecase.NewResultStatus(http.StatusOK, nil)
 }

@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"github.com/takeuchi-shogo/ticket-api/internal/adapters/presenters"
 	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase/services"
@@ -15,6 +18,7 @@ type MeController interface {
 	Get(ctx Context)
 	Post(ctx Context)
 	GetMe(ctx Context)
+	Patch(ctx Context)
 }
 
 type meController struct {
@@ -29,9 +33,6 @@ func NewMeController(me services.MeService) MeController {
 
 func (m *meController) Get(ctx Context) {
 
-	// email := ctx.Query("email")
-	// pass := ctx.Query("password")
-
 	user := &models.Users{}
 
 	if err := ctx.BindJSON(user); err != nil {
@@ -45,7 +46,7 @@ func (m *meController) Get(ctx Context) {
 		return
 	}
 
-	ctx.Header(constants.AuthorizationHeaderKey, foundUser.Token)
+	ctx.Header(constants.AuthorizationHeaderKey, foundUser.Token.AccessToken)
 
 	ctx.JSON(res.StatusCode, presenters.NewResponse(foundUser.User))
 }
@@ -65,7 +66,7 @@ func (m *meController) Post(ctx Context) {
 		return
 	}
 
-	ctx.Header(constants.AuthorizationHeaderKey, newUser.Token)
+	ctx.Header(constants.AuthorizationHeaderKey, newUser.Token.AccessToken)
 
 	ctx.JSON(res.StatusCode, presenters.NewResponse(newUser.User))
 }
@@ -74,5 +75,55 @@ func (m *meController) GetMe(ctx Context) {
 
 	authPayload := ctx.MustGet(constants.AuthorizationPayloadKey).(*token.CustomClaims)
 
-	fmt.Printf("%+v", authPayload)
+	userID, _ := strconv.Atoi(authPayload.UserID)
+
+	foundUser, res := m.me.GetMe(userID)
+	if res.Err != nil {
+		ctx.JSON(res.StatusCode, presenters.NewErrResponse(res.Err.Error()))
+		return
+	}
+
+	ctx.JSON(res.StatusCode, presenters.NewResponse(foundUser))
+}
+
+type UserRequest struct {
+	DisplayName *string `json:"display_name"`
+	Email       *string `json:"email"`
+}
+
+func (m *meController) Patch(ctx Context) {
+
+	authPayload := ctx.MustGet(constants.AuthorizationPayloadKey).(*token.CustomClaims)
+
+	id, _ := strconv.ParseUint(authPayload.UserID, 10, 64)
+
+	user := &models.Users{
+		ID: id,
+	}
+
+	body, _ := ctx.GetRawData()
+	u := &UserRequest{}
+
+	if err := json.Unmarshal(body, u); err != nil {
+		ctx.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	email := *u.Email
+	fmt.Println("user reqest", email)
+	if displayName, ok := ctx.GetPostForm("displayName"); ok {
+		user.DisplayName = &displayName
+	}
+	if email, ok := ctx.GetPostForm("email"); ok {
+		fmt.Println("email", email)
+		user.Email = email
+	}
+
+	me, res := m.me.Save(user)
+	if res.Err != nil {
+		ctx.JSON(res.StatusCode, presenters.NewErrResponse(res.Err.Error()))
+		return
+	}
+
+	ctx.JSON(res.StatusCode, presenters.NewResponse(me))
 }

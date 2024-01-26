@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS `events` (
 	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`organizer_id` int UNSIGNED NOT NULL,
+	`artist_id` int UNSIGNED NOT NULL,
 	`venue_id` int NULL,
 	`title` varchar(255) NOT NULL,
 	`performance_period` varchar(255) NOT NULL,

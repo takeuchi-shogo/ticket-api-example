@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/takeuchi-shogo/ticket-api/internal/domain/models"
 	"github.com/takeuchi-shogo/ticket-api/internal/usecase"
@@ -30,6 +31,9 @@ func (o *organizerRepository) FindByID(db bun.IDB, id int) (*models.Organizers, 
 
 func (o *organizerRepository) Create(db bun.IDB, organizer *models.Organizers) (*models.Organizers, error) {
 	ctx := context.Background()
+
+	organizer.CreatedAt = time.Now().Unix()
+	organizer.UpdatedAt = time.Now().Unix()
 
 	_, err := db.NewInsert().Model(organizer).Exec(ctx)
 	if err != nil {

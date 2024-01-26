@@ -15,4 +15,16 @@ type TicketItemsResponse struct {
 	EventID       int    `json:"event_id"`
 	Title         string `json:"title"`
 	IssuingNumber int    `json:"issuing_number"`
+
+	// TicketHasItem 情報も加えておく
+	TicketHasItem *TicketHasItemsResponse `json:"ticket_has_item"`
+}
+
+func (t *TicketItems) BuildForGet() *TicketItemsResponse {
+	return &TicketItemsResponse{
+		ID:            t.ID,
+		EventID:       t.EventID,
+		Title:         t.Title,
+		IssuingNumber: t.IssuingNumber,
+	}
 }
