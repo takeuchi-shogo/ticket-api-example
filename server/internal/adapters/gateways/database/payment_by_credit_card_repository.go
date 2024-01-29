@@ -28,6 +28,10 @@ func (p *paymentByCreditCardRepository) Create(db bun.IDB, payment *models.Payme
 	payment.CreatedAt = time.Now().Unix()
 	payment.UpdatedAt = time.Now().Unix()
 
+	if err := payment.Validate(); err != nil {
+		return &models.PaymentByCreditCards{}, err
+	}
+
 	if _, err := db.NewInsert().Model(payment).Exec(context.Background()); err != nil {
 		return &models.PaymentByCreditCards{}, err
 	}

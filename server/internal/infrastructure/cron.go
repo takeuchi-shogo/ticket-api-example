@@ -46,7 +46,7 @@ func NewCron(
 
 func (c *Cron) newJob() {
 
-	job, err := c.Cron.NewJob(
+	_, err := c.Cron.NewJob(
 		cron.DurationJob(
 			time.Second*5,
 		),
@@ -70,8 +70,6 @@ func (c *Cron) newJob() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	log.Println("sss", job.ID())
 }
 
 func (c *Cron) setTasks() {}

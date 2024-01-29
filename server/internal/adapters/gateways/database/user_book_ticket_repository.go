@@ -68,6 +68,10 @@ func (u *userBookTicketRepository) Create(db bun.IDB, userBookTicket *models.Use
 	userBookTicket.CreatedAt = time.Now().Unix()
 	userBookTicket.UpdatedAt = time.Now().Unix()
 
+	if err := userBookTicket.Validate(); err != nil {
+		return &models.UserBookTickets{}, err
+	}
+
 	_, err := db.NewInsert().Model(userBookTicket).Exec(context.Background())
 	return userBookTicket, err
 }
