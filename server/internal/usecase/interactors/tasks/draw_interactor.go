@@ -100,7 +100,7 @@ func (d *drawInteractor) drawingByTicket(db bun.IDB, ticket *models.Tickets) err
 			continue
 		}
 
-		numberOfTickets, err := d.winningProcess(db, userBookTicket, userBookTicketsTemp[userBookTicket.ID])
+		numberOfTickets, err := d.winningProcess(db /* userBookTicket,*/, userBookTicketsTemp[userBookTicket.ID])
 		if err != nil {
 			// 現状は特に理由なしでエラーになれば当選予定枚数を減らす
 			numberOfWinningTicketCnt--
@@ -121,6 +121,11 @@ func (d *drawInteractor) drawingByTicket(db bun.IDB, ticket *models.Tickets) err
 	// 落選処理
 	for _, userBookTicket := range userBookTickets {
 
+		// 当選したチケットはtrueのもの
+		if winningUserBookTickets[userBookTicket.ID] {
+			continue
+		}
+
 		for _, userHasTicket := range userBookTicketsTemp[userBookTicket.ID] {
 			userHasTicket.TicketStatus = d.ticketStatus.NotWon
 			_, err := d.userHasTicket.Save(db, userHasTicket)
@@ -139,17 +144,14 @@ func (d *drawInteractor) drawingByTicket(db bun.IDB, ticket *models.Tickets) err
 }
 
 func (d *drawInteractor) checkExitWinningProcess(numberOfWinningTicketCnt, numberOfWinningTickets int) bool {
-	if numberOfWinningTicketCnt != numberOfWinningTickets {
-		return false
-	}
-	return true
+	return numberOfWinningTicketCnt == numberOfWinningTickets
 }
 
-func (d *drawInteractor) checkExitRejectionProcess() bool {
-	return true
-}
+// func (d *drawInteractor) checkExitRejectionProcess() bool {
+// 	return true
+// }
 
-func (d *drawInteractor) winningProcess(db bun.IDB, userBookTicket *models.UserBookTickets, userHasTickets []*models.UserHasTickets) (int, error) {
+func (d *drawInteractor) winningProcess(db bun.IDB /* userBookTicket *models.UserBookTickets, */, userHasTickets []*models.UserHasTickets) (int, error) {
 	numberOfTickets := 0 // 当選処理をした枚数
 	// データの整合性はとれているものと仮定する
 	// 今は当選した処理を記述
@@ -164,19 +166,19 @@ func (d *drawInteractor) winningProcess(db bun.IDB, userBookTicket *models.UserB
 	return numberOfTickets, nil
 }
 
-func (d *drawInteractor) notWonProcess(db bun.IDB, userBookTicket *models.UserBookTickets, userHasTickets []*models.UserHasTickets) (int, error) {
-	numberOfTickets := 0 // 落選処理をした枚数
-	// 今は落選した処理を記述
-	for _, userHasTicket := range userHasTickets {
-		userHasTicket.TicketStatus = d.ticketStatus.NotWon
-		if _, err := d.userHasTicket.Save(db, userHasTicket); err != nil {
-			continue
-		}
-		numberOfTickets++
-	}
+// func (d *drawInteractor) notWonProcess(db bun.IDB /* userBookTicket *models.UserBookTickets,*/, userHasTickets []*models.UserHasTickets) (int, error) {
+// 	numberOfTickets := 0 // 落選処理をした枚数
+// 	// 今は落選した処理を記述
+// 	for _, userHasTicket := range userHasTickets {
+// 		userHasTicket.TicketStatus = d.ticketStatus.NotWon
+// 		if _, err := d.userHasTicket.Save(db, userHasTicket); err != nil {
+// 			continue
+// 		}
+// 		numberOfTickets++
+// 	}
 
-	return numberOfTickets, nil
-}
+// 	return numberOfTickets, nil
+// }
 
 func (d *drawInteractor) recalculationWinningTicketCnt(
 	numberOfWinningTicketCnt, numberOfWinningTickets int,
@@ -208,10 +210,10 @@ func (d *drawInteractor) recalculationWinningTicketCnt(
 	return numberOfWinningTicketCnt
 }
 
-func (d *drawInteractor) validationWinningTicket(db bun.IDB, winningTicket *models.UserHasTickets) error {
-	// 各種データの確認
+// func (d *drawInteractor) validationWinningTicket(db bun.IDB, winningTicket *models.UserHasTickets) error {
+// 	// 各種データの確認
 
-	// 複数枚購入の場合、どちらも当選または落選させたいのでその処理も記述する <-これは元の関数で行う？
+// 	// 複数枚購入の場合、どちらも当選または落選させたいのでその処理も記述する <-これは元の関数で行う？
 
-	return nil
-}
+// 	return nil
+// }

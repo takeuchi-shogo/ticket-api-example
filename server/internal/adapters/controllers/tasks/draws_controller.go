@@ -19,5 +19,9 @@ func NewDrawsController() DrawsController {
 }
 
 func (d *drawsController) Start() {
-	log.Println("抽選開始！！！")
+	if err := d.draw.StartDrawing(); err != nil {
+		log.Println(err)
+		return
+	}
+	log.Println("success")
 }

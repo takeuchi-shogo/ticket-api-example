@@ -204,17 +204,25 @@ func (s *Stripe) AuthenticatePaymentIntent(amount int, customerID string) (strin
 }
 
 // オーソリで確保した与信を支払い確定とする
-func (s *Stripe) CapturePaymentIntent(paymentID string) error {
+func (s *Stripe) CapturePaymentIntent(paymentID string) (*models.StripePaymentIntents, error) {
 	stripe.Key = s.SecretKey
 
 	params := &stripe.PaymentIntentCaptureParams{}
 
 	result, err := paymentintent.Capture(paymentID, params)
 	if err != nil {
-		return err
+		return &models.StripePaymentIntents{}, err
 	}
-	log.Println(result)
-	return nil
+	// こちらのモデルに合わせた構造体
+	payment := &models.StripePaymentIntents{
+		ID:     result.ID,
+		Amount: int(result.Amount),
+		// Captured:  result.Captured,
+		// Created:   result.Created,
+		Currency: string(result.Currency),
+		// InvoiceID: result.Invoice,
+		Status: string(result.Status)}
+	return payment, nil
 }
 
 // 確保した与信を解放する
